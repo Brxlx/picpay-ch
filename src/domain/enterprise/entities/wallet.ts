@@ -5,7 +5,8 @@ import { WalletType } from './wallet-type';
 
 export interface WalletProps {
   fullName: string;
-  cpfCnpj: string;
+  cpf: string;
+  cnpj?: string;
   email: string;
   password: string;
   balance: number;
@@ -19,8 +20,12 @@ export class Wallet extends Entity<WalletProps> {
     return this.props.fullName;
   }
 
-  get cpfCnpj() {
-    return this.props.cpfCnpj;
+  get cpf() {
+    return this.props.cpf;
+  }
+
+  get cnpj() {
+    return this.props.cnpj;
   }
 
   get email() {

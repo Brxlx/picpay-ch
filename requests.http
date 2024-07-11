@@ -5,6 +5,6 @@ Content-Type: application/json
 {
   "fullName": "John Doe",
   "email": "john@doe.com",
-  "password": "1234567",
-  "cpfCnpj": ""
+  "password": "12345678",
+  "cpf": "002.111.221-60"
 }

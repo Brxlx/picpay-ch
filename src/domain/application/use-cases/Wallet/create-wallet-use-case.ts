@@ -7,7 +7,8 @@ interface CreateWalletUseCaseRequest {
   fullName: string;
   email: string;
   password: string;
-  cpfCnpj: string;
+  cpf: string;
+  cnpj?: string;
   walletType?: WALLET_TYPE;
 }
 
@@ -23,32 +24,28 @@ export class CreateWalletUseCase {
     fullName,
     email,
     password,
-    cpfCnpj,
-    walletType,
+    cpf,
+    cnpj,
   }: CreateWalletUseCaseRequest): Promise<CreateWalletUseCaseResponse> {
-    let walletOnDb = await this.walletsRepository.findByCpfCnpj(cpfCnpj);
+    await this.validateCpf(cpf);
 
-    if (walletOnDb) throw new Error('Wallet account already exists');
+    if (cnpj) await this.validateCnpj(cnpj);
 
-    walletOnDb = await this.walletsRepository.findByEmail(email);
-
-    if (walletOnDb) throw new Error('Wallet email already exists');
-
-    // TODO: Verify CpfCnpj
+    await this.validateEmail(email);
 
     // Cryptograph password
     const hashedPassword = await this.hashGenerator.hash(password);
+
     // Create new Wallet instance
-    const newWallet = Wallet.create(
-      Wallet.create({
-        fullName,
-        email,
-        password: hashedPassword,
-        cpfCnpj,
-        walletType: walletType ?? WALLET_TYPE.USER,
-        balance: 0,
-      }),
-    );
+    const newWallet = Wallet.create({
+      fullName,
+      email,
+      password: hashedPassword,
+      cpf,
+      cnpj,
+      walletType: cnpj ? WALLET_TYPE.MERCHANT : WALLET_TYPE.USER,
+      balance: 0,
+    });
 
     // Save on repository
     await this.walletsRepository.create(newWallet);
@@ -56,5 +53,27 @@ export class CreateWalletUseCase {
     return { wallet: newWallet };
   }
 
-  // private verifyCpfCnpj(cpfCnpj: string) {}
+  private async validateCpf(cpf: string) {
+    if (cpf.length !== 14) throw new Error('Invalid CPF');
+    const cpfWalletOnDb = await this.walletsRepository.findByCpfCnpj(cpf);
+    if (cpfWalletOnDb) throw new Error('Wallet account already exists');
+
+    return cpf;
+  }
+
+  private async validateCnpj(cnpj: string) {
+    if (cnpj.length !== 18) throw new Error('Invalid CNPJ');
+    const cnpjWalletOnDb = await this.walletsRepository.findByCpfCnpj(cnpj);
+    if (cnpjWalletOnDb) throw new Error('Wallet account already exists');
+
+    return cnpj;
+  }
+
+  private async validateEmail(email: string) {
+    const emailWalletOnDb = await this.walletsRepository.findByEmail(email);
+
+    if (emailWalletOnDb) throw new Error('Wallet email already exists');
+
+    return email;
+  }
 }
