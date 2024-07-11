@@ -2,6 +2,7 @@ import { FakeHasher } from 'test/crypto/fake-hasher';
 import { InMemoryWalletsRepository } from 'test/repositories/in-memory-wallets-repository';
 
 import { CreateWalletUseCase } from './create-wallet-use-case';
+import { makeWallet } from 'test/factories/make-wallet-factory';
 
 let inMemoryStudentsRepository: InMemoryWalletsRepository;
 let fakeHasher: FakeHasher;
@@ -43,5 +44,17 @@ describe('Create Wallet', () => {
     const hashedPassword = await fakeHasher.hash('12345678');
 
     expect(inMemoryStudentsRepository.items[0].password === hashedPassword);
+  });
+
+  it('should compare hashed password with plain text', async () => {
+    const newWallet = await makeWallet({ password: '12345678' });
+
+    const hashedPassword = await fakeHasher.hash(newWallet.password);
+    const compared = await fakeHasher.compare(
+      newWallet.password,
+      hashedPassword,
+    );
+
+    expect(compared).toBeTruthy();
   });
 });
