@@ -1,0 +1,10 @@
+#
+POST http://localhost:3000/wallets
+Content-Type: application/json
+
+{
+  "fullName": "John Doe",
+  "email": "john@doe.com",
+  "password": "1234567",
+  "cpfCnpj": ""
+}

@@ -1,0 +1,13 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pass-in-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://$DB_USER}:${DB_PASS}@host.docker.internal:5432/${DB_DB}?schema=public
