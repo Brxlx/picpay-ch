@@ -2,8 +2,7 @@ import { faker } from '@faker-js/faker/locale/pt_BR';
 
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { Wallet, WalletProps } from '@/domain/enterprise/entities/wallet';
-import { WALLET_TYPE } from '@/core/types/wallet-type';
-import { generateValidCPF } from '@/infra/helpers/generateCPF';
+import { Identifiers } from '@/infra/helpers/Identifiers';
 
 export async function makeWallet(
   override: Partial<WalletProps> = {},
@@ -13,10 +12,9 @@ export async function makeWallet(
     {
       fullName: faker.person.fullName(),
       email: faker.internet.email().toLocaleLowerCase(),
-      cpf: override.cpf ?? generateValidCPF(),
-      cnpj: override.cnpj && faker.string.numeric({ length: 18 }),
+      cpf: override.cpf ?? Identifiers.generateValidCPF(),
+      cnpj: override.cnpj,
       balance: faker.number.float({ fractionDigits: 2 }),
-      walletType: WALLET_TYPE.USER,
       password: faker.internet.password({ length: 8 }),
       ...override,
     },

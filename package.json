@@ -35,6 +35,7 @@
     "@prisma/client": "^5.16.2",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
+    "validation-br": "1.4.5",
     "zod": "3.23.8",
     "zod-validation-error": "3.3.0"
   },

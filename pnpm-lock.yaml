@@ -32,6 +32,9 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      validation-br:
+        specifier: 1.4.5
+        version: 1.4.5
       zod:
         specifier: 3.23.8
         version: 3.23.8
@@ -2433,6 +2436,9 @@ packages:
 
   v8-compile-cache-lib@3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
+
+  validation-br@1.4.5:
+    resolution: {integrity: sha512-d1YKYhQLrnHp3wc4GpDgP1yLGKDsELrrOIQBPyfr8eEfS0ub1/ZTf+pf7X3lUvGYh6+lbYkJ0wsZX4/3lUiOOg==}
 
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
@@ -4934,6 +4940,8 @@ snapshots:
   utils-merge@1.0.1: {}
 
   v8-compile-cache-lib@3.0.1: {}
+
+  validation-br@1.4.5: {}
 
   vary@1.1.2: {}
 

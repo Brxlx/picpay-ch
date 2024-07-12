@@ -2,6 +2,7 @@ import { Entity } from '@/core/entities/entity';
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { Optional } from '@/core/types/optional';
 import { WalletType } from './wallet-type';
+import { WALLET_TYPE } from '@/core/types/wallet-type';
 
 export interface WalletProps {
   fullName: string;
@@ -62,12 +63,13 @@ export class Wallet extends Entity<WalletProps> {
   }
 
   static create(
-    props: Optional<WalletProps, 'createdAt'>,
+    props: Optional<WalletProps, 'walletType' | 'createdAt'>,
     id?: UniqueEntityID,
   ) {
     return new Wallet(
       {
         ...props,
+        walletType: props.cnpj ? WALLET_TYPE.MERCHANT : WALLET_TYPE.USER,
         createdAt: props.createdAt ?? new Date(),
       },
       id,

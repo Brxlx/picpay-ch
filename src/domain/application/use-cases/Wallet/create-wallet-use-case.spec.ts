@@ -3,6 +3,7 @@ import { InMemoryWalletsRepository } from 'test/repositories/in-memory-wallets-r
 
 import { CreateWalletUseCase } from './create-wallet-use-case';
 import { makeWallet } from 'test/factories/make-wallet-factory';
+import { Identifiers } from '@/infra/helpers/Identifiers';
 
 let inMemoryStudentsRepository: InMemoryWalletsRepository;
 let fakeHasher: FakeHasher;
@@ -23,6 +24,7 @@ suite('[Wallet]', () => {
         cpf: '701.180.430-72',
         password: '12345678',
       });
+      console.log('111', newWallet);
       const result = await sut.execute(newWallet);
 
       expect(result).toBeTruthy();
@@ -37,9 +39,10 @@ suite('[Wallet]', () => {
       const newWallet = await makeWallet({
         fullName: 'John Doe',
         email: 'johndoe@email.com',
-        cnpj: '72.033.776/0001-19',
+        cnpj: Identifiers.generateValidCNPJ(),
         password: '12345678',
       });
+      console.log('2222', newWallet);
       const result = await sut.execute(newWallet);
 
       expect(result).toBeTruthy();
@@ -55,9 +58,10 @@ suite('[Wallet]', () => {
       const newWallet = await makeWallet({
         fullName: 'John Doe',
         email: 'johndoe@email.com',
-        // cnpj: '72.033.776/0001-19',
+        cnpj: '72.033.776/0001-19',
         password: '12345678',
       });
+      console.log('333', newWallet);
 
       await sut.execute(newWallet);
 
