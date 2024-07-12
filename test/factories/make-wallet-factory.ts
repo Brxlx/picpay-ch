@@ -14,7 +14,7 @@ export async function makeWallet(
       email: faker.internet.email().toLocaleLowerCase(),
       cpf: override.cpf ?? Identifiers.generateValidCPF(),
       cnpj: override.cnpj,
-      balance: faker.number.float({ fractionDigits: 2 }),
+      balance: faker.number.float({ fractionDigits: 2, min: 0, max: 3000 }),
       password: faker.internet.password({ length: 8 }),
       ...override,
     },

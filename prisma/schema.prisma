@@ -8,6 +8,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id String @id @default(uuid())
+model Wallet {
+  id        String   @id @default(uuid())
+  fullName  String   @map("full_name")
+  email     String   @unique
+  cpf       String   @unique
+  cnpj      String?  @unique
+  password  String
+  balance   Decimal  @default(0.0) @db.Decimal(9, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updadated_at")
+
+  walletType   WalletType @relation(fields: [walletTypeId], references: [id], onDelete: Cascade)
+  walletTypeId String     @map("wallet_type_id")
+
+  @@map("wallet")
+}
+
+enum WALLET_TYPE {
+  USER
+  MERCHANT
+}
+
+model WalletType {
+  id          String      @id @default(uuid())
+  description WALLET_TYPE @default(USER)
+  Wallet      Wallet[]
+
+  @@unique([id, description])
+  @@map("wallet_type")
 }

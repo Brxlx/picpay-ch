@@ -11,9 +11,14 @@ const createWalletSchema = z.object({
   cpf: z.string().refine((cpf: string) => {
     return Identifiers.validateCPF(cpf);
   }, 'Digite um cpf válido.'),
-  cnpj: z.string().length(18).optional(),
+  cnpj: z
+    .string()
+    .length(18)
+    .refine((cnpj: string) => {
+      return Identifiers.validateCNPJ(cnpj);
+    })
+    .optional(),
   password: z.string().min(8),
-  // walletType: z.nativeEnum(WALLET_TYPE).optional().default(WALLET_TYPE.USER),
 });
 
 type CreateWalletSchema = z.infer<typeof createWalletSchema>;

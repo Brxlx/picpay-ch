@@ -8,7 +8,6 @@ interface CreateWalletUseCaseRequest {
   password: string;
   cpf: string;
   cnpj?: string;
-  // walletType?: WALLET_TYPE;
 }
 
 type CreateWalletUseCaseResponse = { wallet: Wallet };
@@ -42,7 +41,6 @@ export class CreateWalletUseCase {
       password: hashedPassword,
       cpf,
       cnpj,
-      // walletType,
       balance: 0,
     });
 

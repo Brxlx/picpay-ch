@@ -8,3 +8,16 @@ Content-Type: application/json
   "password": "12345678",
   "cpf": "002.111.221-60"
 }
+
+
+###
+POST http://localhost:3000/wallets
+Content-Type: application/json
+
+{
+  "fullName": "John Doe",
+  "email": "john@doe.com",
+  "password": "12345678",
+  "cpf": "002.111.221-60",
+  "cnpj": "72.033.776/0001-19"
+}

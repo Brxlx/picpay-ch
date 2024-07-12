@@ -54,6 +54,14 @@ export class Wallet extends Entity<WalletProps> {
     return this.props.walletType;
   }
 
+  get createdAt() {
+    return this.props.createdAt;
+  }
+
+  get updatedAt() {
+    return this.props.updatedAt;
+  }
+
   private format(value: string) {
     return value.toLocaleLowerCase();
   }
