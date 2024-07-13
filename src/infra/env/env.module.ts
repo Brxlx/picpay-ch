@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { EnvService } from './envService';
+import { EnvService } from './env.service';
 import { ConfigModule } from '@nestjs/config';
 import { envSchema } from './env-schema';
 
