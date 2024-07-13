@@ -17,7 +17,8 @@ suite('[Wallet]', () => {
       inMemoryWalletsRepository = new InMemoryWalletsRepository();
       inMemoryWalletsTypeRepository = new InMemoryWalletsTypeRepository();
       fakeHasher = new FakeHasher();
-
+      // TODO: create fake wallet type
+      // inMemoryWalletsTypeRepository.create();
       sut = new CreateWalletUseCase(
         inMemoryWalletsRepository,
         inMemoryWalletsTypeRepository,

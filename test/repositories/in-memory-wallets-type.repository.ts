@@ -13,7 +13,6 @@ export class InMemoryWalletsTypeRepository implements WalletsTypeRepository {
       { description: description },
       new UniqueEntityID(description),
     );
-    console.log('AAAAAA', walletType);
     return walletType;
   }
 }
