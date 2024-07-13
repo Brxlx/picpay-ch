@@ -12,6 +12,7 @@ export class PrismaWalletMapper {
         cpf: raw.cpf,
         cnpj: raw.cnpj ?? undefined,
         balance: Number(raw.balance),
+        walletTypeId: new UniqueEntityID(raw.walletTypeId),
         password: raw.password,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
@@ -29,6 +30,7 @@ export class PrismaWalletMapper {
       cpf: wallet.cpf,
       cnpj: wallet.cnpj,
       balance: wallet.balance,
+      walletTypeId: wallet.walletTypeId.toString(),
       createdAt: wallet.createdAt,
       updatedAt: wallet.updatedAt ?? undefined,
     };

@@ -4,18 +4,25 @@ import { InMemoryWalletsRepository } from 'test/repositories/in-memory-wallets-r
 import { CreateWalletUseCase } from './create-wallet-use-case';
 import { makeWallet } from 'test/factories/make-wallet-factory';
 import { Identifiers } from '@/infra/helpers/Identifiers';
+import { InMemoryWalletsTypeRepository } from 'test/repositories/in-memory-wallets-type.repository';
 
-let inMemoryStudentsRepository: InMemoryWalletsRepository;
+let inMemoryWalletsRepository: InMemoryWalletsRepository;
+let inMemoryWalletsTypeRepository: InMemoryWalletsTypeRepository;
 let fakeHasher: FakeHasher;
 // system under test
 let sut: CreateWalletUseCase;
 suite('[Wallet]', () => {
   describe('Create Wallet', () => {
     beforeEach(() => {
-      inMemoryStudentsRepository = new InMemoryWalletsRepository();
+      inMemoryWalletsRepository = new InMemoryWalletsRepository();
+      inMemoryWalletsTypeRepository = new InMemoryWalletsTypeRepository();
       fakeHasher = new FakeHasher();
 
-      sut = new CreateWalletUseCase(inMemoryStudentsRepository, fakeHasher);
+      sut = new CreateWalletUseCase(
+        inMemoryWalletsRepository,
+        inMemoryWalletsTypeRepository,
+        fakeHasher,
+      );
     });
     it('should be able to create a new user wallet', async () => {
       const newWallet = await makeWallet({
@@ -29,10 +36,10 @@ suite('[Wallet]', () => {
 
       expect(result).toBeTruthy();
       expect(result).toEqual({
-        wallet: inMemoryStudentsRepository.items[0],
+        wallet: inMemoryWalletsRepository.items[0],
       });
       expect(result.wallet.id.toString()).toEqual(
-        inMemoryStudentsRepository.items[0].id.toString(),
+        inMemoryWalletsRepository.items[0].id.toString(),
       );
     });
     it('should be able to create a new merchant wallet', async () => {
@@ -47,10 +54,10 @@ suite('[Wallet]', () => {
 
       expect(result).toBeTruthy();
       expect(result).toEqual({
-        wallet: inMemoryStudentsRepository.items[0],
+        wallet: inMemoryWalletsRepository.items[0],
       });
       expect(result.wallet.id.toString()).toEqual(
-        inMemoryStudentsRepository.items[0].id.toString(),
+        inMemoryWalletsRepository.items[0].id.toString(),
       );
     });
 
@@ -67,7 +74,7 @@ suite('[Wallet]', () => {
 
       const hashedPassword = await fakeHasher.hash('12345678');
 
-      expect(inMemoryStudentsRepository.items[0].password === hashedPassword);
+      expect(inMemoryWalletsRepository.items[0].password === hashedPassword);
     });
 
     it('should compare hashed password with plain text', async () => {

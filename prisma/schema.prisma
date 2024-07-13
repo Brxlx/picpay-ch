@@ -20,7 +20,7 @@ model Wallet {
   updatedAt DateTime @updatedAt @map("updadated_at")
 
   walletType   WalletType @relation(fields: [walletTypeId], references: [id], onDelete: Cascade)
-  walletTypeId String     @map("wallet_type_id")
+  walletTypeId String     @map("wallet_type_description")
 
   @@map("wallet")
 }
@@ -32,9 +32,8 @@ enum WALLET_TYPE {
 
 model WalletType {
   id          String      @id @default(uuid())
-  description WALLET_TYPE @default(USER)
+  description WALLET_TYPE @unique @default(USER)
   Wallet      Wallet[]
 
-  @@unique([id, description])
   @@map("wallet_type")
 }

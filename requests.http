@@ -6,7 +6,7 @@ Content-Type: application/json
   "fullName": "John Doe",
   "email": "john@doe.com",
   "password": "12345678",
-  "cpf": "002.111.221-60"
+  "cpf": "628.958.540-17"
 }
 
 
@@ -15,9 +15,9 @@ POST http://localhost:3000/wallets
 Content-Type: application/json
 
 {
-  "fullName": "John Doe",
-  "email": "john@doe.com",
+  "fullName": "Bruno Santos",
+  "email": "bruno@email.com",
   "password": "12345678",
-  "cpf": "002.111.221-60",
+  "cpf": "558.199.350-55",
   "cnpj": "72.033.776/0001-19"
 }

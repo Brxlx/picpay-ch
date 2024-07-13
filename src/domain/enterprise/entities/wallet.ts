@@ -12,6 +12,7 @@ export interface WalletProps {
   password: string;
   balance: number;
   walletType: WalletType['props']['description'];
+  walletTypeId: UniqueEntityID;
   createdAt: Date;
   updatedAt?: Date | null;
 }
@@ -52,6 +53,10 @@ export class Wallet extends Entity<WalletProps> {
 
   get walletType() {
     return this.props.walletType;
+  }
+
+  get walletTypeId() {
+    return this.props.walletTypeId;
   }
 
   get createdAt() {
