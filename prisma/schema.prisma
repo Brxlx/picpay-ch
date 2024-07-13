@@ -20,7 +20,10 @@ model Wallet {
   updatedAt DateTime @updatedAt @map("updadated_at")
 
   walletType   WalletType @relation(fields: [walletTypeId], references: [id], onDelete: Cascade)
-  walletTypeId String     @map("wallet_type_description")
+  walletTypeId String     @map("wallet_type_id")
+
+  sender   Transaction[] @relation("SenderWalletId")
+  receiver Transaction[] @relation("ReceiverWalletId")
 
   @@map("wallet")
 }
@@ -36,4 +39,15 @@ model WalletType {
   Wallet      Wallet[]
 
   @@map("wallet_type")
+}
+
+model Transaction {
+  id         String  @id @default(uuid())
+  amount     Decimal @default(0.0) @db.Decimal(9, 2)
+  sender     Wallet  @relation("SenderWalletId", fields: [senderId], references: [id])
+  senderId   String
+  receiver   Wallet  @relation("ReceiverWalletId", fields: [receiverId], references: [id])
+  receiverId String
+
+  @@map("transaction")
 }
