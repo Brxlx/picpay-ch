@@ -5,7 +5,7 @@ import { Wallet, WalletProps } from '@/domain/enterprise/entities/wallet';
 import { Identifiers } from '@/infra/helpers/Identifiers';
 
 export async function makeWallet(
-  override: Partial<WalletProps> = {},
+  override: Partial<Omit<WalletProps, 'walletType'>> = {},
   id?: UniqueEntityID,
 ) {
   return Wallet.create(

@@ -4,6 +4,8 @@ import { WalletsRepository } from '../../repositories/wallets-repository';
 import { Transaction } from '@/domain/enterprise/entities/transaction';
 import { WALLET_TYPE } from '@/core/types/wallet-type';
 import { Notification } from '../../gateways/notification/notification';
+import { Authorizer } from '../../gateways/authorizer/authorize';
+import { EnvService } from '@/infra/env/env.service';
 
 interface MakeTransactionUseCaseRequest {
   payer: string;
@@ -17,6 +19,8 @@ export class MakeTransactionUseCase {
   constructor(
     private readonly transactionRepository: TransactionRepository,
     private readonly walletsRepository: WalletsRepository,
+    private readonly envService: EnvService,
+    private readonly authorizer: Authorizer,
     private readonly notification: Notification,
   ) {}
 
@@ -28,7 +32,8 @@ export class MakeTransactionUseCase {
     const payerInDb = await this.verifySender(payer);
     const payeeInDb = await this.verifyReceiver(payee);
 
-    await this.verifyPayerBalance(payerInDb, payeeInDb, amount);
+    await this.verifyPayerBalance(payerInDb, amount);
+    await this.makeTransaction(payerInDb, payeeInDb, amount);
 
     return { isAuthorized: true };
   }
@@ -49,24 +54,40 @@ export class MakeTransactionUseCase {
     return receiver;
   }
 
-  private async verifyPayerBalance(
-    payer: Wallet,
-    payee: Wallet,
-    amount: number,
-  ) {
+  private async verifyPayerBalance(payer: Wallet, amount: number) {
     if (payer.balance <= 0 || payer.balance < amount)
       throw new Error('Insuficient balance to make transaction');
+  }
 
+  private async makeTransaction(payer: Wallet, payee: Wallet, amount: number) {
     payer.balance -= amount;
     payee.balance += amount;
 
-    console.log(payer, payee);
-
     const transaction = Transaction.create({
       sender: payer.id,
-      receiver: payee.walletTypeId,
+      receiver: payee.id,
       amount,
     });
-    await this.transactionRepository.tranfer(transaction);
+
+    // First authorize transaction
+    const isTransactionAuthorized = await this.authorizeTransaction(
+      transaction,
+      this.envService.get('TRANSFER_AUTHORIZER_MOCK'),
+    );
+    // Do the transaction
+    if (isTransactionAuthorized) {
+      await this.transactionRepository.tranfer(transaction);
+      // Send notification
+      await this.notification.notificate(transaction);
+    }
+  }
+
+  private async authorizeTransaction(transaction: Transaction, url: string) {
+    console.log('urlllll', url);
+    const { isAuthorized } = await this.authorizer.authorize(transaction, url);
+
+    if (!isAuthorized) throw new Error('Transaction not authorized');
+
+    return true;
   }
 }
