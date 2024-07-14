@@ -10,6 +10,7 @@ import { WalletsTypeRepository } from '@/domain/application/repositories/wallets
     PrismaService,
     { provide: WalletsRepository, useClass: PrismaWalletsRepository },
     { provide: WalletsTypeRepository, useClass: PrismaWalletsTypeRepository },
+    // { provide: TransactionRepository, useClass: PrismaTransactionRepository },
   ],
   exports: [PrismaService, WalletsRepository, WalletsTypeRepository],
 })

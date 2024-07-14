@@ -47,7 +47,7 @@ export class Wallet extends Entity<WalletProps> {
   }
 
   set balance(balance: number) {
-    this.balance = balance;
+    this.props.balance = balance;
     this.touch();
   }
 

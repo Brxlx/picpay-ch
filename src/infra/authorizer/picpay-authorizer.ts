@@ -1,5 +1,5 @@
+import { Authorizer } from '@/domain/application/gateways/authorizer/authorize';
 import { Transaction } from '@/domain/enterprise/entities/transaction';
-import { Authorizer } from 'test/http/fake-authorizer';
 
 export class PicPayAuthorizer implements Authorizer {
   async authorize(
