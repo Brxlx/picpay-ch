@@ -18,6 +18,38 @@ Content-Type: application/json
   "fullName": "Bruno Santos",
   "email": "bruno@email.com",
   "password": "12345678",
-  "cpf": "558.199.350-55",
-  "cnpj": "72.033.776/0001-19"
+  "cpf": "558.199.350-55"
+}
+
+
+###
+POST http://localhost:3000/tranfer
+Content-Type: application/json
+
+{
+  "payer": "4aa7d52d-f81f-46f3-9323-8149743489a2",
+  "payee": "92cb3ba1-e175-4100-a92b-022fe1d1e403",
+  "amount": 10
+}
+
+###
+POST http://localhost:3000/tranfer
+Content-Type: application/json
+# Merchant cannot transfer
+
+{
+  "payer": "92cb3ba1-e175-4100-a92b-022fe1d1e403",
+  "payee": "4aa7d52d-f81f-46f3-9323-8149743489a2",
+  "amount": 10
+}
+
+###
+POST http://localhost:3000/tranfer
+Content-Type: application/json
+# Transfer between users
+
+{
+  "payer": "d5de1f27-5aa8-4d87-bcbb-83714ef46a99",
+  "payee": "4aa7d52d-f81f-46f3-9323-8149743489a2",
+  "amount": 10
 }

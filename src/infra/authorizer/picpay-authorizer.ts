@@ -6,7 +6,7 @@ export class PicPayAuthorizer implements Authorizer {
     transaction: Transaction,
     url: string,
   ): Promise<{ isAuthorized: boolean }> {
-    const isAuthorized = await fetch(url, {
+    const isAuthorized = (await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -16,10 +16,12 @@ export class PicPayAuthorizer implements Authorizer {
         payee: transaction.receiver,
         amount: transaction.amount,
       }),
-    }).then((response) => response.json().then((json) => json));
+    }).then((response) => response.json().then((json) => json))) as {
+      authorized: boolean;
+    };
 
     console.log(isAuthorized);
 
-    return { isAuthorized: isAuthorized as boolean };
+    return { isAuthorized: isAuthorized.authorized };
   }
 }

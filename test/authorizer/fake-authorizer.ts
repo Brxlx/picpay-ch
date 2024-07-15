@@ -14,9 +14,10 @@ export class FakeAuthorizer implements Authorizer {
 
     if (!isAuthorized) {
       console.log('Transaction NOT AUTHORIZED');
+      return { isAuthorized: false };
     } else {
       console.log('Transaction AUTHORIZED');
+      return { isAuthorized: true };
     }
-    return { isAuthorized };
   }
 }

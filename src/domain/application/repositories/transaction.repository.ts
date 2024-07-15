@@ -1,7 +1,10 @@
 import { Transaction } from '@/domain/enterprise/entities/transaction';
+import { Wallet } from '@/domain/enterprise/entities/wallet';
 
 export abstract class TransactionRepository {
   abstract tranfer(
     transaction: Transaction,
-  ): Promise<{ isAuthorized: boolean }>;
+    payer: Wallet,
+    payee: Wallet,
+  ): Promise<Transaction | undefined>;
 }

@@ -33,9 +33,13 @@ export class MakeTransactionUseCase {
     const payeeInDb = await this.verifyReceiver(payee);
 
     await this.verifyPayerBalance(payerInDb, amount);
-    await this.makeTransaction(payerInDb, payeeInDb, amount);
+    const { isAuthorized } = await this.makeTransaction(
+      payerInDb,
+      payeeInDb,
+      amount,
+    );
 
-    return { isAuthorized: true };
+    return { isAuthorized };
   }
 
   private async verifySender(senderId: string) {
@@ -70,31 +74,46 @@ export class MakeTransactionUseCase {
     });
 
     // First authorize transaction
-    const isTransactionAuthorized = await this.authorizeTransaction(
+    const { isAuthorized } = await this.authorizeTransaction(
       transaction,
+      payer,
+      payee,
       this.envService.get('TRANSFER_AUTHORIZER_MOCK'),
     );
-    // Do the transaction
-    if (isTransactionAuthorized) {
-      await this.transactionRepository.tranfer(transaction);
-      // Send notification
-      await this.notification.notificate(transaction);
 
-      // console.log(
-      //   'balance after',
-      //   payer.balance,
-      //   payee.balance,
-      //   payer.balance + payee.balance,
-      // );
+    if (!isAuthorized) {
+      return { isAuthorized: false };
     }
+    // Do the transaction
+    await this.transactionRepository.tranfer(transaction, payer, payee);
+    // Send notification
+    await this.notification.notificate(transaction);
+    console.log(
+      'balance after',
+      payer.balance,
+      payee.balance,
+      payer.balance + payee.balance,
+    );
+    return { isAuthorized: true };
   }
 
-  private async authorizeTransaction(transaction: Transaction, url: string) {
+  private async authorizeTransaction(
+    transaction: Transaction,
+    payer: Wallet,
+    payee: Wallet,
+    url: string,
+  ) {
     console.log('urlllll', url);
     const { isAuthorized } = await this.authorizer.authorize(transaction, url);
 
-    if (!isAuthorized) throw new Error('Transaction not authorized');
+    if (!isAuthorized) {
+      return { isAuthorized: false };
+    }
 
-    return true;
+    // Change the balance in DB
+    await this.walletsRepository.update(payer);
+    await this.walletsRepository.update(payee);
+
+    return { isAuthorized: true };
   }
 }

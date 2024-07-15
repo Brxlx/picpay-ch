@@ -4,12 +4,12 @@ import { Transaction } from '@/domain/enterprise/entities/transaction';
 export class InMemoryTransactionsRepository implements TransactionRepository {
   public items: Transaction[] = [];
 
-  async tranfer(transaction: Transaction): Promise<{ isAuthorized: boolean }> {
+  async tranfer(transaction: Transaction): Promise<Transaction | undefined> {
     if (transaction.amount < 0) {
-      return { isAuthorized: false };
+      return undefined;
     }
 
     this.items.push(transaction);
-    return { isAuthorized: true };
+    return transaction;
   }
 }

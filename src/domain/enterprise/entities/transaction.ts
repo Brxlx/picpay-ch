@@ -22,6 +22,10 @@ export class Transaction extends Entity<TransactionProps> {
     return this.props.amount;
   }
 
+  get createdAt() {
+    return this.props.createdAt;
+  }
+
   static create(
     props: Optional<TransactionProps, 'createdAt'>,
     id?: UniqueEntityID,

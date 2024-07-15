@@ -4,14 +4,21 @@ import { WalletsRepository } from '@/domain/application/repositories/wallets-rep
 import { PrismaWalletsRepository } from './prisma/repositories/prisma-wallets.repository';
 import { PrismaWalletsTypeRepository } from './prisma/repositories/prisma.wallets-type.repository';
 import { WalletsTypeRepository } from '@/domain/application/repositories/wallets-type.repository';
+import { TransactionRepository } from '@/domain/application/repositories/transaction.repository';
+import { PrismaTransactionRepository } from './prisma/repositories/prisma-transaction.repository';
 
 @Module({
   providers: [
     PrismaService,
     { provide: WalletsRepository, useClass: PrismaWalletsRepository },
     { provide: WalletsTypeRepository, useClass: PrismaWalletsTypeRepository },
-    // { provide: TransactionRepository, useClass: PrismaTransactionRepository },
+    { provide: TransactionRepository, useClass: PrismaTransactionRepository },
   ],
-  exports: [PrismaService, WalletsRepository, WalletsTypeRepository],
+  exports: [
+    PrismaService,
+    WalletsRepository,
+    WalletsTypeRepository,
+    TransactionRepository,
+  ],
 })
 export class DatabaseModule {}
