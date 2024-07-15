@@ -65,7 +65,6 @@ export class MakeTransactionUseCase {
 
   private async makeTransaction(payer: Wallet, payee: Wallet, amount: number) {
     // Update the balance on Wallet instance of payer and payee
-
     payer.balance -= amount;
     payee.balance += amount;
 

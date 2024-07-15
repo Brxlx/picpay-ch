@@ -14,10 +14,10 @@ async function createWalletType() {
     },
   });
   if (findIfAlreadyCreatedWalletTypes.length) {
-    console.log('Wallet Types already exists');
+    console.log('---Wallet Types already exists, skipping...---');
     return;
   }
-  console.log('Seeding db with wallet types');
+  console.log('---Seeding db with wallet types---');
   await prisma.walletType.createMany({
     data: [
       {
@@ -28,18 +28,20 @@ async function createWalletType() {
       },
     ],
   });
-  console.log('Finished seeding wallet types');
+  console.log('---Finished seeding wallet types---');
 }
 
 async function createWallets() {
   const walletTypeUser = await prisma.walletType.findFirst({
     where: { description: 'USER' },
   });
-  console.log(walletTypeUser);
 
-  if (!walletTypeUser) return;
+  if (!walletTypeUser) {
+    console.log('user not found');
+    return;
+  }
 
-  console.log('Seeding db with wallets');
+  console.log('---Seeding db with wallets---');
 
   const createwalletUser = prisma.wallet.create({
     data: {
@@ -47,6 +49,7 @@ async function createWallets() {
       email: 'user@email.com',
       password: await new BcryptHasher().hash('12345678'),
       cpf: Identifiers.generateValidCPF(),
+      balance: 50,
       walletType: {
         connect: {
           id: walletTypeUser.id,
@@ -66,11 +69,12 @@ async function createWallets() {
 
   const createWalletMerchant = prisma.wallet.create({
     data: {
-      fullName: 'Merchant User',
-      email: 'merchant@email.com',
+      fullName: 'PicPay',
+      email: 'picpay@email.com',
       password: await new BcryptHasher().hash('12345678'),
       cpf: Identifiers.generateValidCPF(),
       cnpj: Identifiers.generateValidCNPJ(),
+      balance: 100,
       walletType: {
         connect: {
           id: walletTypeMerchant.id,
@@ -78,9 +82,15 @@ async function createWallets() {
       },
     },
   });
-
-  await prisma.$transaction([createwalletUser, createWalletMerchant]);
-  console.log('Finished seeding db with wallets');
+  try {
+    await prisma.$transaction([createwalletUser, createWalletMerchant]);
+    console.log('---Finished seeding db with wallets---');
+  } catch (err: any) {
+    if (err.code === 'P2002') {
+      throw new Error('user or merchant already exists');
+    }
+    throw new Error('Some constraint or DB error, check database');
+  }
 }
 
 async function run() {
