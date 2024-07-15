@@ -42,11 +42,12 @@ model WalletType {
 }
 
 model Transaction {
-  id         String  @id @default(uuid())
-  amount     Decimal @default(0.0) @db.Decimal(9, 2)
-  sender     Wallet  @relation("SenderWalletId", fields: [senderId], references: [id])
+  id         String   @id @default(uuid())
+  amount     Decimal  @default(0.0) @db.Decimal(9, 2)
+  createdAt  DateTime @default(now()) @map("created_at")
+  sender     Wallet   @relation("SenderWalletId", fields: [senderId], references: [id])
   senderId   String
-  receiver   Wallet  @relation("ReceiverWalletId", fields: [receiverId], references: [id])
+  receiver   Wallet   @relation("ReceiverWalletId", fields: [receiverId], references: [id])
   receiverId String
 
   @@map("transaction")
