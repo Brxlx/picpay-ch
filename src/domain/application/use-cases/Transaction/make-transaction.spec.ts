@@ -10,9 +10,11 @@ import { FakeEnv } from 'test/env/fake-env';
 import { EnvService } from '@/infra/env/env.service';
 import { makeTransaction } from 'test/factories/make-transaction-factory';
 
+let PAYER_INITIAL_AMOUNT: number;
+let PAYEE_INITIAL_AMOUNT: number;
 let inMemoryTransactionsRepository: InMemoryTransactionsRepository;
 let inMemoryWalletsRepository: InMemoryWalletsRepository;
-let envService: FakeEnv;
+let fakeEnvService: FakeEnv;
 let fakeAuthorizer: FakeAuthorizer;
 let fakeNotification: FakeNotification;
 // system under test
@@ -20,15 +22,17 @@ let sut: MakeTransactionUseCase;
 suite('[Transaction]', () => {
   describe('Make Transaction', () => {
     beforeEach(() => {
+      PAYER_INITIAL_AMOUNT = 50;
+      PAYEE_INITIAL_AMOUNT = 20;
       inMemoryTransactionsRepository = new InMemoryTransactionsRepository();
       inMemoryWalletsRepository = new InMemoryWalletsRepository();
-      envService = new FakeEnv();
+      fakeEnvService = new FakeEnv();
       fakeAuthorizer = new FakeAuthorizer();
       fakeNotification = new FakeNotification();
       sut = new MakeTransactionUseCase(
         inMemoryTransactionsRepository,
         inMemoryWalletsRepository,
-        envService as unknown as EnvService,
+        fakeEnvService as unknown as EnvService,
         fakeAuthorizer,
         fakeNotification,
       );
@@ -36,17 +40,19 @@ suite('[Transaction]', () => {
 
     it('should be able to make a transaction from User to Merchant', async () => {
       const sender = await makeWallet(
-        { balance: 50 },
+        { balance: PAYER_INITIAL_AMOUNT },
         new UniqueEntityID('SENDER-ID'),
       );
+      expect(sender.balance).toEqual(PAYER_INITIAL_AMOUNT);
+
       const receiver = await makeWallet(
         {
           cnpj: Identifiers.generateValidCNPJ(),
-          balance: 20,
+          balance: PAYEE_INITIAL_AMOUNT,
         },
         new UniqueEntityID('RECEIVER-ID'),
       );
-      console.log(sender);
+      expect(receiver.balance).toEqual(PAYEE_INITIAL_AMOUNT);
 
       await inMemoryWalletsRepository.create(sender);
       await inMemoryWalletsRepository.create(receiver);
@@ -54,7 +60,7 @@ suite('[Transaction]', () => {
       const transaction = await makeTransaction({
         sender: sender.id,
         receiver: receiver.id,
-        amount: 15,
+        amount: 25,
       });
 
       const { isAuthorized } = await sut.execute({
@@ -64,6 +70,10 @@ suite('[Transaction]', () => {
       });
 
       expect(isAuthorized).toBeTruthy();
+      expect(sender.balance).toEqual(PAYER_INITIAL_AMOUNT - transaction.amount);
+      expect(receiver.balance).toEqual(
+        PAYEE_INITIAL_AMOUNT + transaction.amount,
+      );
     });
   });
 });

@@ -64,6 +64,8 @@ export class MakeTransactionUseCase {
   }
 
   private async makeTransaction(payer: Wallet, payee: Wallet, amount: number) {
+    // Update the balance on Wallet instance of payer and payee
+
     payer.balance -= amount;
     payee.balance += amount;
 
@@ -87,13 +89,12 @@ export class MakeTransactionUseCase {
     // Do the transaction
     await this.transactionRepository.tranfer(transaction, payer, payee);
     // Send notification
-    await this.notification.notificate(transaction);
-    console.log(
-      'balance after',
-      payer.balance,
-      payee.balance,
-      payer.balance + payee.balance,
-    );
+    await this.notification.notificate(transaction, payee);
+    console.table([
+      { 'payer balance': payer.balance },
+      { 'payee balance': payee.balance },
+      { 'sum tota': payer.balance + payee.balance },
+    ]);
     return { isAuthorized: true };
   }
 
@@ -109,10 +110,6 @@ export class MakeTransactionUseCase {
     if (!isAuthorized) {
       return { isAuthorized: false };
     }
-
-    // Change the balance in DB
-    await this.walletsRepository.update(payer);
-    await this.walletsRepository.update(payee);
 
     return { isAuthorized: true };
   }

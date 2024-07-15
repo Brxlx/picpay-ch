@@ -32,7 +32,6 @@ suite('[Wallet]', () => {
         cpf: '701.180.430-72',
         password: '12345678',
       });
-      console.log('111', newWallet);
       const result = await sut.execute(newWallet);
 
       expect(result).toBeTruthy();
@@ -50,7 +49,6 @@ suite('[Wallet]', () => {
         cnpj: Identifiers.generateValidCNPJ(),
         password: '12345678',
       });
-      console.log('2222', newWallet);
       const result = await sut.execute(newWallet);
 
       expect(result).toBeTruthy();
@@ -69,7 +67,6 @@ suite('[Wallet]', () => {
         cnpj: '72.033.776/0001-19',
         password: '12345678',
       });
-      console.log('333', newWallet);
 
       await sut.execute(newWallet);
 

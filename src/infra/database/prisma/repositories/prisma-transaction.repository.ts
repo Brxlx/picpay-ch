@@ -27,13 +27,16 @@ export class PrismaTransactionRepository implements TransactionRepository {
       data: { balance: payee.balance },
     });
 
-    const [doneTransaction] = await this.prisma.$transaction([
-      newTransaction,
-      updatePayerBalance,
-      updatePayeeBalance,
-    ]);
+    try {
+      const [doneTransaction] = await this.prisma.$transaction([
+        newTransaction,
+        updatePayerBalance,
+        updatePayeeBalance,
+      ]);
 
-    if (!doneTransaction)
       return PrismaTransactionMapper.toDomain(doneTransaction);
+    } catch (err) {
+      throw new Error('Error on making transaction, reverting...');
+    }
   }
 }

@@ -43,14 +43,6 @@ export class PrismaWalletsRepository implements WalletsRepository {
     });
   }
 
-  async update(wallet: Wallet): Promise<void> {
-    const walletToUpdate = PrismaWalletMapper.toPrisma(wallet);
-    await this.prisma.wallet.update({
-      where: { id: walletToUpdate.id },
-      data: walletToUpdate,
-    });
-  }
-
   async delete(id: string): Promise<void> {
     await this.prisma.wallet.delete({ where: { id } });
   }

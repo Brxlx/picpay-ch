@@ -20,8 +20,6 @@ export class PicPayAuthorizer implements Authorizer {
       authorized: boolean;
     };
 
-    console.log(isAuthorized);
-
     return { isAuthorized: isAuthorized.authorized };
   }
 }

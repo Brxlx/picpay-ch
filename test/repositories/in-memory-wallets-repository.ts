@@ -30,12 +30,4 @@ export class InMemoryWalletsRepository implements WalletsRepository {
   async create(wallet: Wallet): Promise<void> {
     this.items.push(wallet);
   }
-
-  async update(wallet: Wallet): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-
-  async delete(id: string): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
 }
