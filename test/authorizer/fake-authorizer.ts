@@ -9,6 +9,7 @@ export class FakeAuthorizer implements Authorizer {
     console.log(`Amount of ${transaction.amount} to authorize.`);
 
     // Simulate fetch call
+    console.log('fetching the authorizer...');
     await new Promise((res) => setTimeout(res, 500));
 
     if (!isAuthorized) {

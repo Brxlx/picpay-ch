@@ -79,6 +79,13 @@ export class MakeTransactionUseCase {
       await this.transactionRepository.tranfer(transaction);
       // Send notification
       await this.notification.notificate(transaction);
+
+      // console.log(
+      //   'balance after',
+      //   payer.balance,
+      //   payee.balance,
+      //   payer.balance + payee.balance,
+      // );
     }
   }
 

@@ -8,6 +8,7 @@ import { FakeAuthorizer } from 'test/authorizer/fake-authorizer';
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { FakeEnv } from 'test/env/fake-env';
 import { EnvService } from '@/infra/env/env.service';
+import { makeTransaction } from 'test/factories/make-transaction-factory';
 
 let inMemoryTransactionsRepository: InMemoryTransactionsRepository;
 let inMemoryWalletsRepository: InMemoryWalletsRepository;
@@ -50,12 +51,16 @@ suite('[Transaction]', () => {
       await inMemoryWalletsRepository.create(sender);
       await inMemoryWalletsRepository.create(receiver);
 
-      const amount = 10;
+      const transaction = await makeTransaction({
+        sender: sender.id,
+        receiver: receiver.id,
+        amount: 15,
+      });
 
       const { isAuthorized } = await sut.execute({
-        payer: sender.id.toString(),
-        payee: receiver.id.toString(),
-        amount,
+        payer: transaction.sender.toString(),
+        payee: transaction.receiver.toString(),
+        amount: transaction.amount,
       });
 
       expect(isAuthorized).toBeTruthy();
