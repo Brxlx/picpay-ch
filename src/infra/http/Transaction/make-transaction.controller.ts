@@ -19,7 +19,7 @@ import { InvalidUserTypeOnTranferError } from '@/domain/application/use-cases/er
 const makeTransactionSchema = z.object({
   payer: z.string().uuid(),
   payee: z.string().uuid(),
-  amount: z.number(),
+  amount: z.number().positive(),
 });
 
 type MakeTransactionSchema = z.infer<typeof makeTransactionSchema>;
@@ -52,7 +52,6 @@ export class MakeTransactionController {
         case InvalidUserTypeOnTranferError:
           throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         default:
-          console.log('caí foi aqui');
           throw new BadRequestException(err.message);
       }
     }

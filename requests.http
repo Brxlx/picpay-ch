@@ -50,7 +50,7 @@ Content-Type: application/json
 {
   "payer": "e5134117-83f8-40ab-b9f1-fd40d1d60560",
   "payee": "5ff4d1e7-1ab7-4d97-8deb-1062b08d526e",
-  "amount": 1
+  "amount": 0
 }
 
 ###

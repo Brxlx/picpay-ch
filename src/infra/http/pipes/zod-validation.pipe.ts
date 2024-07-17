@@ -18,7 +18,6 @@ export class ZodValidationPipe implements PipeTransform {
       if (err instanceof ZodError) {
         throw new BadRequestException({
           message: 'Error validating input fields',
-          statusCode: 400,
           errors: fromZodError(err).message,
         });
       }
