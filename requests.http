@@ -46,10 +46,19 @@ Content-Type: application/json
 ###
 POST http://localhost:3000/tranfer
 Content-Type: application/json
-# Transfer between users
 
 {
-  "payer": "d5de1f27-5aa8-4d87-bcbb-83714ef46a99",
-  "payee": "4aa7d52d-f81f-46f3-9323-8149743489a2",
-  "amount": 10
+  "payer": "e5134117-83f8-40ab-b9f1-fd40d1d60560",
+  "payee": "5ff4d1e7-1ab7-4d97-8deb-1062b08d526e",
+  "amount": 1
+}
+
+###
+POST http://localhost:3000/tranfer
+Content-Type: application/json
+
+{
+  "payer": "5ff4d1e7-1ab7-4d97-8deb-1062b08d526e",
+  "payee": "e5134117-83f8-40ab-b9f1-fd40d1d60560",
+  "amount": 1
 }

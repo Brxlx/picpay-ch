@@ -27,13 +27,17 @@
     "test:e2e:watch": "vitest --config ./vitest.config.e2e.mts"
   },
   "dependencies": {
+    "@anatine/zod-nestjs": "2.0.9",
+    "@anatine/zod-openapi": "2.2.6",
     "@faker-js/faker": "8.4.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "3.2.3",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/swagger": "7.4.0",
     "@prisma/client": "^5.16.2",
     "bcryptjs": "2.4.3",
+    "openapi3-ts": "4.3.3",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "validation-br": "1.4.5",

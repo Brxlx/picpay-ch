@@ -6,6 +6,9 @@ import { WALLET_TYPE } from '@/core/types/wallet-type';
 import { Notification } from '../../gateways/notification/notification';
 import { Authorizer } from '../../gateways/authorizer/authorize';
 import { EnvService } from '@/infra/env/env.service';
+import { TransactionNotAuthorizedError } from '../errors/transaction-not-authorized-error';
+import { UserOnTransactionNotFoundError } from '../errors/user-on-transacton-not-found';
+import { InvalidUserTypeOnTranferError } from '../errors/invalid-user-type-on-transfer-error';
 
 interface MakeTransactionUseCaseRequest {
   payer: string;
@@ -44,16 +47,17 @@ export class MakeTransactionUseCase {
 
   private async verifySender(senderId: string) {
     const sender = await this.walletsRepository.findById(senderId);
-    if (!sender) throw new Error('Sender not found');
+    if (!sender) throw new UserOnTransactionNotFoundError('Sender not found');
     if (sender.walletType === WALLET_TYPE.MERCHANT)
-      throw new Error('Merchants can not tranfer');
+      throw new InvalidUserTypeOnTranferError();
 
     return sender;
   }
 
   private async verifyReceiver(receiverId: string) {
     const receiver = await this.walletsRepository.findById(receiverId);
-    if (!receiver) throw new Error('Receiver not found');
+    if (!receiver)
+      throw new UserOnTransactionNotFoundError('Receiver not found');
 
     return receiver;
   }
@@ -75,39 +79,31 @@ export class MakeTransactionUseCase {
     });
 
     // First authorize transaction
-    const { isAuthorized } = await this.authorizeTransaction(
+    await this.authorizeTransaction(
       transaction,
-      payer,
-      payee,
       this.envService.get('TRANSFER_AUTHORIZER_MOCK'),
     );
 
-    if (!isAuthorized) {
-      return { isAuthorized: false };
-    }
     // Do the transaction
     await this.transactionRepository.tranfer(transaction, payer, payee);
     // Send notification
-    await this.notification.notificate(transaction, payee);
+    const notificationToSend = await this.notification.notificate(
+      transaction,
+      payee,
+    );
     console.table([
       { 'payer balance': payer.balance },
       { 'payee balance': payee.balance },
       { 'sum tota': payer.balance + payee.balance },
     ]);
-    return { isAuthorized: true };
+    return { isAuthorized: true, notification: notificationToSend };
   }
 
-  private async authorizeTransaction(
-    transaction: Transaction,
-    payer: Wallet,
-    payee: Wallet,
-    url: string,
-  ) {
-    console.log('urlllll', url);
+  private async authorizeTransaction(transaction: Transaction, url: string) {
     const { isAuthorized } = await this.authorizer.authorize(transaction, url);
 
     if (!isAuthorized) {
-      return { isAuthorized: false };
+      throw new TransactionNotAuthorizedError({ isAuthorized: false });
     }
 
     return { isAuthorized: true };
