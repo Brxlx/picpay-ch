@@ -16,7 +16,9 @@ interface MakeTransactionUseCaseRequest {
   amount: number;
 }
 
-type MakeTransactionUseCaseResponse = { isAuthorized: boolean };
+type MakeTransactionUseCaseResponse = {
+  isAuthorized: boolean;
+};
 
 export class MakeTransactionUseCase {
   constructor(
@@ -87,16 +89,13 @@ export class MakeTransactionUseCase {
     // Do the transaction
     await this.transactionRepository.tranfer(transaction, payer, payee);
     // Send notification
-    const notificationToSend = await this.notification.notificate(
-      transaction,
-      payee,
-    );
+    await this.notification.notificate(transaction, payee);
     console.table([
       { 'payer balance': payer.balance },
       { 'payee balance': payee.balance },
       { 'sum tota': payer.balance + payee.balance },
     ]);
-    return { isAuthorized: true, notification: notificationToSend };
+    return { isAuthorized: true };
   }
 
   private async authorizeTransaction(transaction: Transaction, url: string) {

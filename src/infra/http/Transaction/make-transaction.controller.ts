@@ -38,11 +38,12 @@ export class MakeTransactionController {
   ) {
     const { payer, payee, amount } = body;
     try {
-      await this.makeTransactionService.execute({
+      const { isAuthorized } = await this.makeTransactionService.execute({
         payer,
         payee,
         amount,
       });
+      return { isAuthorized };
     } catch (err: any) {
       switch (err.constructor) {
         case TransactionNotAuthorizedError:
