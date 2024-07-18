@@ -1,10 +1,10 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   HttpCode,
   HttpException,
   HttpStatus,
+  InternalServerErrorException,
   Post,
 } from '@nestjs/common';
 import { MakeTransactionService } from './make-transaction.service';
@@ -54,19 +54,27 @@ export class MakeTransactionController {
       });
       return { isAuthorized };
     } catch (err: any) {
-      console.log(typeof err.constructor, new err.constructor(err.message));
-      switch (err.constructor) {
-        case InsuficientBalanceError:
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        case TransactionNotAuthorizedError:
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        case UserOnTransactionNotFoundError:
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        case InvalidUserTypeOnTranferError:
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        default:
-          throw new BadRequestException(err.message);
-      }
+      this.handleControllerError(err);
+    }
+  }
+
+  private handleControllerError(err: {
+    constructor: any;
+    message: string | Record<string, any>;
+  }) {
+    switch (err.constructor) {
+      case InsuficientBalanceError:
+        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+      case TransactionNotAuthorizedError:
+        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+      case UserOnTransactionNotFoundError:
+        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+      case InvalidUserTypeOnTranferError:
+        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+      default:
+        throw new InternalServerErrorException(
+          err.message ?? 'Something went wrong on Server',
+        );
     }
   }
 }

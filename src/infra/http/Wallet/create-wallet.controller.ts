@@ -4,6 +4,7 @@ import {
   HttpCode,
   HttpException,
   HttpStatus,
+  InternalServerErrorException,
   Post,
 } from '@nestjs/common';
 import { CreateWalletService } from './create-wallet.service';
@@ -52,14 +53,25 @@ export class CreateWalletController {
         balance,
       });
     } catch (err: any) {
-      switch (err.constructor) {
-        case InvalidIdentifierError:
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        case WalletAccountExistsError:
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        case EmailAlreadyExistsError:
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-      }
+      this.handleControllerError(err);
+    }
+  }
+
+  private handleControllerError(err: {
+    constructor: any;
+    message: string | Record<string, any>;
+  }) {
+    switch (err.constructor) {
+      case InvalidIdentifierError:
+        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+      case WalletAccountExistsError:
+        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+      case EmailAlreadyExistsError:
+        throw new HttpException(err.message, HttpStatus.BAD_GATEWAY);
+      default:
+        throw new InternalServerErrorException(
+          err.message ?? 'Something went wrong on Server',
+        );
     }
   }
 }

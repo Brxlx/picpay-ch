@@ -9,7 +9,7 @@ export class PicPayAuthorizer implements Authorizer {
     url: string,
   ): Promise<{ isAuthorized: boolean }> {
     try {
-      const isAuthorized = (await fetch(url, {
+      const { authorized } = (await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -19,13 +19,14 @@ export class PicPayAuthorizer implements Authorizer {
           payee: transaction.receiver,
           amount: transaction.amount,
         }),
-      }).then((response) => response.json().then((json) => json))) as {
+      }).then((response) =>
+        response.json().then((jsonSerialized) => jsonSerialized),
+      )) as {
         authorized: boolean;
       };
-      isAuthorized.authorized = false;
-      if (!isAuthorized.authorized)
-        this.logger.error('transaction not authorized');
-      return { isAuthorized: isAuthorized.authorized };
+      // isAuthorized.authorized = false;
+      if (!authorized) this.logger.error('transaction not authorized');
+      return { isAuthorized: authorized };
     } catch {
       this.logger.error('Error authorizing transaction');
       return { isAuthorized: false };
