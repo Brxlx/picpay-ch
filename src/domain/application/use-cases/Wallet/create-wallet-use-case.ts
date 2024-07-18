@@ -11,6 +11,7 @@ interface CreateWalletUseCaseRequest {
   password: string;
   cpf: string;
   cnpj?: string;
+  balance?: number;
 }
 
 type CreateWalletUseCaseResponse = { wallet: Wallet };
@@ -28,6 +29,7 @@ export class CreateWalletUseCase {
     password,
     cpf,
     cnpj,
+    balance,
   }: CreateWalletUseCaseRequest): Promise<CreateWalletUseCaseResponse> {
     await this.validateCpf(cpf);
 
@@ -45,7 +47,7 @@ export class CreateWalletUseCase {
       password: hashedPassword,
       cpf,
       cnpj,
-      balance: 0,
+      balance: balance ?? 0,
       walletTypeId: (await this.getWalletTypeId(cnpj)).id,
     });
 
