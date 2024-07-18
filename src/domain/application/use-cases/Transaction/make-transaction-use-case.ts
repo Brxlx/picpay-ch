@@ -7,8 +7,9 @@ import { Notification } from '../../gateways/notification/notification';
 import { Authorizer } from '../../gateways/authorizer/authorize';
 import { EnvService } from '@/infra/env/env.service';
 import { TransactionNotAuthorizedError } from '../errors/transaction-not-authorized-error';
-import { UserOnTransactionNotFoundError } from '../errors/user-on-transacton-not-found';
+import { UserOnTransactionNotFoundError } from '../errors/user-on-transacton-not-found-error';
 import { InvalidUserTypeOnTranferError } from '../errors/invalid-user-type-on-transfer-error';
+import { InsuficientBalanceError } from '../errors/insuficient-balance-error';
 
 interface MakeTransactionUseCaseRequest {
   payer: string;
@@ -66,7 +67,7 @@ export class MakeTransactionUseCase {
 
   private async verifyPayerBalance(payer: Wallet, amount: number) {
     if (payer.balance <= 0 || payer.balance < amount)
-      throw new Error('Insuficient balance to make transaction');
+      throw new InsuficientBalanceError();
   }
 
   private async makeTransaction(payer: Wallet, payee: Wallet, amount: number) {
@@ -93,7 +94,7 @@ export class MakeTransactionUseCase {
     console.table([
       { 'payer balance': payer.balance },
       { 'payee balance': payee.balance },
-      { 'sum tota': payer.balance + payee.balance },
+      { 'sum total': payer.balance + payee.balance },
     ]);
     return { isAuthorized: true };
   }
