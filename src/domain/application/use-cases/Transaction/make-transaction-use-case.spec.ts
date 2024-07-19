@@ -105,7 +105,7 @@ suite('[Transaction]', () => {
         amount: 25,
       });
 
-      expect(async () => {
+      await expect(async () => {
         await sut.execute({
           payer: transaction.sender.toString(),
           payee: transaction.receiver.toString(),
@@ -114,7 +114,7 @@ suite('[Transaction]', () => {
       }).rejects.toBeInstanceOf(InvalidUserTypeOnTranferError);
     });
 
-    it.only('should not be able to make a transaction from User with insuficient balance', async () => {
+    it('should not be able to make a transaction from User with insuficient balance', async () => {
       PAYER_INITIAL_AMOUNT = 10;
 
       const sender = await makeWallet(
@@ -141,13 +141,13 @@ suite('[Transaction]', () => {
         amount: 25,
       });
 
-      expect(async () => {
+      await expect(async () => {
         await sut.execute({
           payer: transaction.sender.toString(),
           payee: transaction.receiver.toString(),
           amount: transaction.amount,
         });
-      }).rejects.toBeInstanceOf(InsuficientBalanceError);
+      }).rejects.toStrictEqual(new InsuficientBalanceError());
     });
   });
 });

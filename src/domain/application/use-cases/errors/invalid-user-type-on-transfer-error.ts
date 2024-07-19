@@ -1,5 +1,8 @@
 import { UseCaseError } from '@/core/errors/use-case-error';
 
-export class InvalidUserTypeOnTranferError implements UseCaseError {
-  message: string | Record<string, any> = 'Merchants can NOT transfer';
+export class InvalidUserTypeOnTranferError
+  extends Error
+  implements UseCaseError
+{
+  message: string = 'Merchants can NOT transfer';
 }

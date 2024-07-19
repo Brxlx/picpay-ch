@@ -1,8 +1,9 @@
 import { UseCaseError } from './use-case-error';
 
-export class NotAllowedError implements UseCaseError {
-  message: string | Record<string, any>;
+export class NotAllowedError extends Error implements UseCaseError {
+  message: string;
   constructor(message?: string | Record<string, any>) {
-    this.message = message ?? 'Not allowed';
+    super();
+    this.message = (message ?? 'Not allowed') as string;
   }
 }

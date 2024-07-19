@@ -1,5 +1,5 @@
 import { UseCaseError } from '@/core/errors/use-case-error';
 
-export class EmailAlreadyExistsError implements UseCaseError {
-  message: string | Record<string, any> = 'Email already exists';
+export class EmailAlreadyExistsError extends Error implements UseCaseError {
+  message = 'Email already exists';
 }

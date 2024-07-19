@@ -1,9 +1,10 @@
 import { UseCaseError } from '@/core/errors/use-case-error';
 
-export class InvalidIdentifierError implements UseCaseError {
-  message: string | Record<string, any>;
+export class InvalidIdentifierError extends Error implements UseCaseError {
+  message: string;
 
   constructor(message: string | Record<string, any>) {
-    this.message = message;
+    super();
+    this.message = message as string;
   }
 }
