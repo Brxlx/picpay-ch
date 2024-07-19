@@ -46,11 +46,6 @@ export class Wallet extends Entity<WalletProps> {
     return this.props.balance;
   }
 
-  set balance(balance: number) {
-    this.props.balance = balance;
-    this.touch();
-  }
-
   get walletType() {
     return this.props.walletType;
   }
@@ -65,6 +60,16 @@ export class Wallet extends Entity<WalletProps> {
 
   get updatedAt() {
     return this.props.updatedAt;
+  }
+
+  public increaseBalance(amount: number) {
+    this.props.balance += amount;
+    this.touch();
+  }
+
+  public decreaseBalance(amount: number) {
+    this.props.balance -= amount;
+    this.touch();
   }
 
   private format(value: string) {

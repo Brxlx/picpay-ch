@@ -9,6 +9,8 @@ import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { FakeEnv } from 'test/env/fake-env';
 import { EnvService } from '@/infra/env/env.service';
 import { makeTransaction } from 'test/factories/make-transaction-factory';
+import { InvalidUserTypeOnTranferError } from '../errors/invalid-user-type-on-transfer-error';
+import { InsuficientBalanceError } from '../errors/insuficient-balance-error';
 
 let PAYER_INITIAL_AMOUNT: number;
 let PAYEE_INITIAL_AMOUNT: number;
@@ -74,6 +76,78 @@ suite('[Transaction]', () => {
       expect(receiver.balance).toEqual(
         PAYEE_INITIAL_AMOUNT + transaction.amount,
       );
+    });
+
+    it('should not be able to make a transaction from Merchant to User', async () => {
+      const sender = await makeWallet(
+        {
+          balance: PAYER_INITIAL_AMOUNT,
+          cnpj: Identifiers.generateValidCNPJ(),
+        },
+        new UniqueEntityID('SENDER-ID'),
+      );
+      expect(sender.balance).toEqual(PAYER_INITIAL_AMOUNT);
+
+      const receiver = await makeWallet(
+        {
+          balance: PAYEE_INITIAL_AMOUNT,
+        },
+        new UniqueEntityID('RECEIVER-ID'),
+      );
+      expect(receiver.balance).toEqual(PAYEE_INITIAL_AMOUNT);
+
+      await inMemoryWalletsRepository.create(sender);
+      await inMemoryWalletsRepository.create(receiver);
+
+      const transaction = await makeTransaction({
+        sender: sender.id,
+        receiver: receiver.id,
+        amount: 25,
+      });
+
+      expect(async () => {
+        await sut.execute({
+          payer: transaction.sender.toString(),
+          payee: transaction.receiver.toString(),
+          amount: transaction.amount,
+        });
+      }).rejects.toBeInstanceOf(InvalidUserTypeOnTranferError);
+    });
+
+    it.only('should not be able to make a transaction from User with insuficient balance', async () => {
+      PAYER_INITIAL_AMOUNT = 10;
+
+      const sender = await makeWallet(
+        { balance: PAYER_INITIAL_AMOUNT },
+        new UniqueEntityID('SENDER-ID'),
+      );
+      expect(sender.balance).toEqual(PAYER_INITIAL_AMOUNT);
+
+      const receiver = await makeWallet(
+        {
+          cnpj: Identifiers.generateValidCNPJ(),
+          balance: PAYEE_INITIAL_AMOUNT,
+        },
+        new UniqueEntityID('RECEIVER-ID'),
+      );
+      expect(receiver.balance).toEqual(PAYEE_INITIAL_AMOUNT);
+
+      await inMemoryWalletsRepository.create(sender);
+      await inMemoryWalletsRepository.create(receiver);
+
+      const transaction = await makeTransaction({
+        sender: sender.id,
+        receiver: receiver.id,
+        amount: 25,
+      });
+
+      expect(async () => {
+        await sut.execute({
+          payer: transaction.sender.toString(),
+          payee: transaction.receiver.toString(),
+          amount: transaction.amount,
+        });
+      }).rejects.toBeInstanceOf(InsuficientBalanceError);
     });
   });
 });
