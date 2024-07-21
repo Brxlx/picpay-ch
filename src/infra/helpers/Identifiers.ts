@@ -8,10 +8,21 @@ import {
 } from 'validation-br/dist/cnpj';
 
 export class Identifiers {
+  /**
+   * Gera um CPF válido com pontos e hífen (14 caracteres).
+   *
+   * @returns {string} CPF formatado.
+   */
   static generateValidCPF(): string {
     return generateCPF(true);
   }
 
+  /**
+   * Verifica se um CPF informado é válido.
+   *
+   * @param {string} cpf CPF a ser validado.
+   * @returns {boolean} True se o CPF for válido, False caso contrário.
+   */
   static validateCPF(cpf: string): boolean {
     return validateCPF(cpf);
   }
