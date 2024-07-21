@@ -7,8 +7,8 @@ export const envSchema = z.object({
   DB_PASS: z.string(),
   DB_DB: z.string(),
   DATABASE_URL: z.string().url(),
-  TRANSFER_AUTHORIZER_MOCK: z.string().url(),
-  NOTIFICATION_SENDER_MOCK: z.string().url(),
+  TRANSFER_AUTHORIZER_URL_MOCK: z.string().url(),
+  NOTIFICATION_SENDER_URL_MOCK: z.string().url(),
 });
 
 export type Env = z.infer<typeof envSchema>;

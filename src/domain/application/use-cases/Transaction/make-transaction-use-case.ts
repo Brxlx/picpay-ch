@@ -84,7 +84,7 @@ export class MakeTransactionUseCase {
     // First authorize transaction
     await this.authorizeTransaction(
       transaction,
-      this.envService.get('TRANSFER_AUTHORIZER_MOCK'),
+      this.envService.get('TRANSFER_AUTHORIZER_URL_MOCK'),
     );
 
     // Do the transaction
