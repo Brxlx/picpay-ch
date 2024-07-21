@@ -6,8 +6,10 @@ import { PrismaWalletsTypeRepository } from './prisma/repositories/prisma.wallet
 import { WalletsTypeRepository } from '@/domain/application/repositories/wallets-type.repository';
 import { TransactionRepository } from '@/domain/application/repositories/transaction.repository';
 import { PrismaTransactionRepository } from './prisma/repositories/prisma-transaction.repository';
+import { EnvModule } from '../env/env.module';
 
 @Module({
+  imports: [EnvModule],
   providers: [
     PrismaService,
     { provide: WalletsRepository, useClass: PrismaWalletsRepository },

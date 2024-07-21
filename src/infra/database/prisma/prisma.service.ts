@@ -1,12 +1,19 @@
-import { Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { EnvService } from '@/infra/env/env.service';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 
+@Injectable()
 export class PrismaService
   extends PrismaClient<Prisma.PrismaClientOptions, Prisma.LogLevel>
   implements OnModuleInit, OnModuleDestroy
 {
   private readonly logger = new Logger(PrismaService.name);
-  constructor() {
+  constructor(private readonly envService: EnvService) {
     super({
       log: [
         {
@@ -32,6 +39,9 @@ export class PrismaService
 
   async onModuleInit() {
     await this.$connect();
+
+    if (this.envService.get('NODE_ENV') === 'prod') return;
+
     this.$on('query', (event) => {
       const magenta = '\u001b[35m';
       this.logger.log(

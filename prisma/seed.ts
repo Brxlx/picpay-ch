@@ -87,7 +87,7 @@ async function createWallets() {
     console.log('---Finished seeding db with wallets---');
   } catch (err: any) {
     if (err.code === 'P2002') {
-      throw new Error('user or merchant already exists');
+      throw new Error('User or Merchant already exists');
     }
     throw new Error('Some constraint or DB error, check database');
   }
@@ -98,4 +98,11 @@ async function run() {
   await createWallets();
 }
 
-run();
+run()
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
