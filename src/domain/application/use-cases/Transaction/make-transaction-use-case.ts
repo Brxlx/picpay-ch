@@ -82,7 +82,7 @@ export class MakeTransactionUseCase {
     });
 
     // First authorize transaction
-    await this.authorizeTransaction(
+    const { isAuthorized } = await this.authorizeTransaction(
       transaction,
       this.envService.get('TRANSFER_AUTHORIZER_URL_MOCK'),
     );
@@ -96,7 +96,7 @@ export class MakeTransactionUseCase {
       { 'payee balance': payee.balance },
       { 'sum total': payer.balance + payee.balance },
     ]);
-    return { isAuthorized: true };
+    return { isAuthorized };
   }
 
   private async authorizeTransaction(transaction: Transaction, url: string) {
