@@ -10,9 +10,17 @@ import { Notification } from '@/domain/application/gateways/notification/notific
 import { EnvModule } from '@/infra/env/env.module';
 import { AuthorizerModule } from '@/infra/authorizer/authorizer.module';
 import { NotificationModule } from '@/infra/notification/notification.module';
+import { QueueModule } from '@/infra/queue/queue.module';
+import { Queue } from '@/domain/application/gateways/queue/queue';
 
 @Module({
-  imports: [DatabaseModule, EnvModule, AuthorizerModule, NotificationModule],
+  imports: [
+    DatabaseModule,
+    EnvModule,
+    AuthorizerModule,
+    QueueModule,
+    NotificationModule,
+  ],
   controllers: [MakeTransactionController],
   providers: [
     {
@@ -22,6 +30,7 @@ import { NotificationModule } from '@/infra/notification/notification.module';
         walletsRepository: WalletsRepository,
         envService: EnvService,
         authorizer: Authorizer,
+        queue: Queue,
         notification: Notification,
       ) => {
         return new MakeTransactionService(
@@ -29,6 +38,7 @@ import { NotificationModule } from '@/infra/notification/notification.module';
           walletsRepository,
           envService,
           authorizer,
+          queue,
           notification,
         );
       },
@@ -37,6 +47,7 @@ import { NotificationModule } from '@/infra/notification/notification.module';
         WalletsRepository,
         EnvService,
         Authorizer,
+        Queue,
         Notification,
       ],
     },

@@ -10,6 +10,7 @@ import { TransactionNotAuthorizedError } from '../errors/transaction-not-authori
 import { UserOnTransactionNotFoundError } from '../errors/user-on-transacton-not-found-error';
 import { InvalidUserTypeOnTranferError } from '../errors/invalid-user-type-on-transfer-error';
 import { InsuficientBalanceError } from '../errors/insuficient-balance-error';
+import { Queue } from '../../gateways/queue/queue';
 
 interface MakeTransactionUseCaseRequest {
   payer: string;
@@ -27,6 +28,7 @@ export class MakeTransactionUseCase {
     private readonly walletsRepository: WalletsRepository,
     private readonly envService: EnvService,
     private readonly authorizer: Authorizer,
+    private readonly queue: Queue,
     private readonly notification: Notification,
   ) {}
 
@@ -88,6 +90,10 @@ export class MakeTransactionUseCase {
     );
 
     // Do the transaction
+    await this.queue.produce(
+      'create-transaction',
+      Buffer.from(JSON.stringify(transaction)),
+    );
     await this.transactionRepository.tranfer(transaction, payer, payee);
     // Send notification
     await this.notification.notificate(transaction, payee);
