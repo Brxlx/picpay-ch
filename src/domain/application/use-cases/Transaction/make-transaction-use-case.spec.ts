@@ -75,6 +75,8 @@ suite('[Transaction]', () => {
         amount: transaction.amount,
       });
 
+      await fakeQueue.consume('create-transaction');
+
       expect(isAuthorized).toBeTruthy();
       expect(sender.balance).toEqual(PAYER_INITIAL_AMOUNT - transaction.amount);
       expect(receiver.balance).toEqual(
