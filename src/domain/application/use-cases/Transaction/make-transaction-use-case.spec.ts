@@ -11,6 +11,7 @@ import { EnvService } from '@/infra/env/env.service';
 import { makeTransaction } from 'test/factories/make-transaction-factory';
 import { InvalidUserTypeOnTranferError } from '../errors/invalid-user-type-on-transfer-error';
 import { InsuficientBalanceError } from '../errors/insuficient-balance-error';
+import { FakeQueue } from 'test/queue/fake-queue';
 
 let PAYER_INITIAL_AMOUNT: number;
 let PAYEE_INITIAL_AMOUNT: number;
@@ -19,6 +20,7 @@ let inMemoryWalletsRepository: InMemoryWalletsRepository;
 let fakeEnvService: FakeEnv;
 let fakeAuthorizer: FakeAuthorizer;
 let fakeNotification: FakeNotification;
+let fakeQueue: FakeQueue;
 // system under test
 let sut: MakeTransactionUseCase;
 suite('[Transaction]', () => {
@@ -31,11 +33,13 @@ suite('[Transaction]', () => {
       fakeEnvService = new FakeEnv();
       fakeAuthorizer = new FakeAuthorizer();
       fakeNotification = new FakeNotification();
+      fakeQueue = new FakeQueue();
       sut = new MakeTransactionUseCase(
         inMemoryTransactionsRepository,
         inMemoryWalletsRepository,
         fakeEnvService as unknown as EnvService,
         fakeAuthorizer,
+        fakeQueue,
         fakeNotification,
       );
     });
