@@ -26,6 +26,7 @@ import {
   makeTransactionSchema,
 } from './types/transaction-schemas';
 import { InsuficientBalanceError } from '@/domain/application/use-cases/errors/insuficient-balance-error';
+import { SamePayerAndPayeeIdError } from '@/domain/application/use-cases/errors/same-payer-and-payee-id-error';
 
 @Controller('/tranfer')
 export class MakeTransactionController {
@@ -63,6 +64,8 @@ export class MakeTransactionController {
     message: string | Record<string, any>;
   }) {
     switch (err.constructor) {
+      case SamePayerAndPayeeIdError:
+        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
       case InsuficientBalanceError:
         throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
       case TransactionNotAuthorizedError:

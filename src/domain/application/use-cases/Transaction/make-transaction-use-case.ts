@@ -11,6 +11,7 @@ import { UserOnTransactionNotFoundError } from '../errors/user-on-transacton-not
 import { InvalidUserTypeOnTranferError } from '../errors/invalid-user-type-on-transfer-error';
 import { InsuficientBalanceError } from '../errors/insuficient-balance-error';
 import { Queue } from '../../gateways/queue/queue';
+import { SamePayerAndPayeeIdError } from '../errors/same-payer-and-payee-id-error';
 
 interface MakeTransactionUseCaseRequest {
   payer: string;
@@ -37,6 +38,8 @@ export class MakeTransactionUseCase {
     payee,
     amount,
   }: MakeTransactionUseCaseRequest): Promise<MakeTransactionUseCaseResponse> {
+    if (payer === payee) throw new SamePayerAndPayeeIdError();
+
     const payerInDb = await this.verifySender(payer);
     const payeeInDb = await this.verifyReceiver(payee);
 
@@ -89,19 +92,19 @@ export class MakeTransactionUseCase {
       this.envService.get('TRANSFER_AUTHORIZER_URL_MOCK'),
     );
 
-    // Do the transaction
+    // Do the transaction, put message on queue and send notification
     await this.queue.produce(
       'create-transaction',
-      Buffer.from(JSON.stringify(transaction)),
+      Buffer.from(JSON.stringify({ transaction, payee })),
     );
     await this.transactionRepository.tranfer(transaction, payer, payee);
     // Send notification
-    await this.notification.notificate(transaction, payee);
-    console.table([
-      { 'payer balance': payer.balance },
-      { 'payee balance': payee.balance },
-      { 'sum total': payer.balance + payee.balance },
-    ]);
+    // await this.notification.notificate(transaction, payee);
+    // console.table([
+    //   { 'payer balance': payer.balance },
+    //   { 'payee balance': payee.balance },
+    //   { 'sum total': payer.balance + payee.balance },
+    // ]);
     return { isAuthorized };
   }
 
