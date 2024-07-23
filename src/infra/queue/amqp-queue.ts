@@ -41,8 +41,8 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap {
           const { transaction, payee } =
             this.serializeStringToTransactionAndPayeeEntities(msg);
           // Then call notification service to notificate user
-          await this.notification.notificate(transaction, payee);
           consumer.ack(msg);
+          await this.notification.notificate(transaction, payee);
         }
       } catch (err: any) {
         console.log('Error consuming messages, logging...', err.message);

@@ -91,21 +91,27 @@ export class MakeTransactionUseCase {
       transaction,
       this.envService.get('TRANSFER_AUTHORIZER_URL_MOCK'),
     );
+    try {
+      // Save transaction on DB
+      await this.transactionRepository.tranfer(transaction, payer, payee);
 
-    // Do the transaction, put message on queue and send notification
-    await this.queue.produce(
-      'create-transaction',
-      Buffer.from(JSON.stringify({ transaction, payee })),
-    );
-    await this.transactionRepository.tranfer(transaction, payer, payee);
-    // Send notification
-    // await this.notification.notificate(transaction, payee);
-    // console.table([
-    //   { 'payer balance': payer.balance },
-    //   { 'payee balance': payee.balance },
-    //   { 'sum total': payer.balance + payee.balance },
-    // ]);
-    return { isAuthorized };
+      // Put message on queue and send notification
+      await this.queue.produce(
+        'create-transaction',
+        Buffer.from(JSON.stringify({ transaction, payee })),
+      );
+      // Send notification
+      // await this.notification.notificate(transaction, payee);
+      console.table([
+        { 'payer balance': payer.balance },
+        { 'payee balance': payee.balance },
+        { 'sum total': payer.balance + payee.balance },
+      ]);
+      return { isAuthorized };
+    } catch (err) {
+      console.log(err);
+      return { isAuthorized: false };
+    }
   }
 
   private async authorizeTransaction(transaction: Transaction, url: string) {

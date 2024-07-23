@@ -35,7 +35,7 @@ export class PrismaTransactionRepository implements TransactionRepository {
       ]);
 
       return PrismaTransactionMapper.toDomain(doneTransaction);
-    } catch (err) {
+    } catch {
       throw new Error('Error on making transaction, reverting...');
     }
   }
