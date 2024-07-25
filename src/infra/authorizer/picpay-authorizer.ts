@@ -25,7 +25,10 @@ export class PicPayAuthorizer implements Authorizer {
         authorized: boolean;
       };
       // isAuthorized.authorized = false;
-      if (!authorized) this.logger.error('transaction not authorized');
+      if (!authorized) {
+        this.logger.error('transaction not authorized');
+        return { isAuthorized: false };
+      }
       return { isAuthorized: authorized };
     } catch {
       this.logger.error('Error authorizing transaction');
