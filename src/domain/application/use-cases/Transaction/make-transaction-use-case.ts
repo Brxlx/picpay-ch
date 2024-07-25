@@ -3,7 +3,6 @@ import { TransactionRepository } from '../../repositories/transaction.repository
 import { WalletsRepository } from '../../repositories/wallets-repository';
 import { Transaction } from '@/domain/enterprise/entities/transaction';
 import { WALLET_TYPE } from '@/core/types/wallet-type';
-import { Notification } from '../../gateways/notification/notification';
 import { Authorizer } from '../../gateways/authorizer/authorize';
 import { EnvService } from '@/infra/env/env.service';
 import { TransactionNotAuthorizedError } from '../errors/transaction-not-authorized-error';
@@ -30,7 +29,6 @@ export class MakeTransactionUseCase {
     private readonly envService: EnvService,
     private readonly authorizer: Authorizer,
     private readonly queue: Queue,
-    private readonly notification: Notification,
   ) {}
 
   public async execute({

@@ -31,7 +31,6 @@ import { Queue } from '@/domain/application/gateways/queue/queue';
         envService: EnvService,
         authorizer: Authorizer,
         queue: Queue,
-        notification: Notification,
       ) => {
         return new MakeTransactionService(
           transactionRepository,
@@ -39,7 +38,6 @@ import { Queue } from '@/domain/application/gateways/queue/queue';
           envService,
           authorizer,
           queue,
-          notification,
         );
       },
       inject: [

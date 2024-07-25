@@ -3,7 +3,6 @@ import { MakeTransactionUseCase } from './make-transaction-use-case';
 import { makeWallet } from 'test/factories/make-wallet-factory';
 import { InMemoryTransactionsRepository } from 'test/repositories/in-memory-transactions.repository';
 import { InMemoryWalletsRepository } from 'test/repositories/in-memory-wallets-repository';
-import { FakeNotification } from 'test/notification/fake-notification';
 import { FakeAuthorizer } from 'test/authorizer/fake-authorizer';
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { FakeEnv } from 'test/env/fake-env';
@@ -19,7 +18,6 @@ let inMemoryTransactionsRepository: InMemoryTransactionsRepository;
 let inMemoryWalletsRepository: InMemoryWalletsRepository;
 let fakeEnvService: FakeEnv;
 let fakeAuthorizer: FakeAuthorizer;
-let fakeNotification: FakeNotification;
 let fakeQueue: FakeQueue;
 // system under test
 let sut: MakeTransactionUseCase;
@@ -32,7 +30,6 @@ suite('[Transaction]', () => {
       inMemoryWalletsRepository = new InMemoryWalletsRepository();
       fakeEnvService = new FakeEnv();
       fakeAuthorizer = new FakeAuthorizer();
-      fakeNotification = new FakeNotification();
       fakeQueue = new FakeQueue();
       sut = new MakeTransactionUseCase(
         inMemoryTransactionsRepository,
@@ -40,7 +37,6 @@ suite('[Transaction]', () => {
         fakeEnvService as unknown as EnvService,
         fakeAuthorizer,
         fakeQueue,
-        fakeNotification,
       );
     });
 
