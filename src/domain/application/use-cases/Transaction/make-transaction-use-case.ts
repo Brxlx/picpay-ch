@@ -93,7 +93,8 @@ export class MakeTransactionUseCase {
       // Save transaction on DB
       await this.transactionRepository.tranfer(transaction, payer, payee);
 
-      // Put message on queue and send notification
+      // Put message on queue
+      // Notification is sent when the message is read
       await this.queue.produce(
         'create-transaction',
         Buffer.from(JSON.stringify({ transaction, payee })),

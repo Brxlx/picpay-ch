@@ -11,6 +11,7 @@ import { makeTransaction } from 'test/factories/make-transaction-factory';
 import { InvalidUserTypeOnTranferError } from '../errors/invalid-user-type-on-transfer-error';
 import { InsuficientBalanceError } from '../errors/insuficient-balance-error';
 import { FakeQueue } from 'test/queue/fake-queue';
+import { FakeNotification } from 'test/notification/fake-notification';
 
 let PAYER_INITIAL_AMOUNT: number;
 let PAYEE_INITIAL_AMOUNT: number;
@@ -19,6 +20,7 @@ let inMemoryWalletsRepository: InMemoryWalletsRepository;
 let fakeEnvService: FakeEnv;
 let fakeAuthorizer: FakeAuthorizer;
 let fakeQueue: FakeQueue;
+let fakeNotification: FakeNotification;
 // system under test
 let sut: MakeTransactionUseCase;
 suite('[Transaction]', () => {
@@ -31,6 +33,7 @@ suite('[Transaction]', () => {
       fakeEnvService = new FakeEnv();
       fakeAuthorizer = new FakeAuthorizer();
       fakeQueue = new FakeQueue();
+      fakeNotification = new FakeNotification();
       sut = new MakeTransactionUseCase(
         inMemoryTransactionsRepository,
         inMemoryWalletsRepository,
@@ -62,7 +65,7 @@ suite('[Transaction]', () => {
       const transaction = await makeTransaction({
         sender: sender.id,
         receiver: receiver.id,
-        amount: 25,
+        amount: 25.98,
       });
 
       const { isAuthorized } = await sut.execute({
@@ -72,6 +75,7 @@ suite('[Transaction]', () => {
       });
 
       await fakeQueue.consume('create-transaction');
+      await fakeNotification.notificate(transaction, receiver);
 
       expect(isAuthorized).toBeTruthy();
       expect(sender.balance).toEqual(PAYER_INITIAL_AMOUNT - transaction.amount);

@@ -8,7 +8,10 @@ extendZodWithOpenApi(z);
 export const createWalletSchema = extendApi(
   z.object({
     fullName: z.string(),
-    email: z.string().email(),
+    email: z
+      .string()
+      .email()
+      .refine((email) => email.toLowerCase()),
     cpf: z
       .string()
       .length(14)

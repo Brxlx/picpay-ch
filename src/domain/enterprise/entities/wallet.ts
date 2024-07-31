@@ -39,7 +39,7 @@ export class Wallet extends Entity<WalletProps> {
   }
 
   set password(password: string) {
-    this.props.password = this.format(password);
+    this.props.password = password;
   }
 
   get balance() {
@@ -70,10 +70,6 @@ export class Wallet extends Entity<WalletProps> {
   public decreaseBalance(amount: number) {
     this.props.balance -= amount;
     this.touch();
-  }
-
-  private format(value: string) {
-    return value.toLocaleLowerCase();
   }
 
   private touch() {
