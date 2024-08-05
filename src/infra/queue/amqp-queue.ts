@@ -1,6 +1,6 @@
 import { Queue } from '@/domain/application/gateways/queue/queue';
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
-import { ConsumeMessage, connect } from 'amqplib';
+import { Channel, ConsumeMessage, connect } from 'amqplib';
 import { EnvService } from '../env/env.service';
 import { Transaction } from '@/domain/enterprise/entities/transaction';
 import { Notification } from '@/domain/application/gateways/notification/notification';
@@ -30,22 +30,18 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap {
 
   async consume(topic: string): Promise<void> {
     const connection = await connect(this.envService.get('RABBITMQ_URL'));
-
+    const dlqName = topic.concat('.dlx');
     const consumer = await connection.createChannel();
-    await consumer.assertQueue(topic);
+
+    //Queue setup
+    await consumer.assertQueue(topic, {
+      durable: true,
+      deadLetterRoutingKey: dlqName,
+    });
 
     await consumer.consume(topic, async (msg) => {
-      try {
-        if (msg) {
-          // Serialize again the parsed message into a full Transaction instance witth getters and setters
-          const { transaction, payee } =
-            this.serializeStringToTransactionAndPayeeEntities(msg);
-          // Then call notification service to notificate user
-          consumer.ack(msg);
-          await this.notification.notificate(transaction, payee);
-        }
-      } catch (err: any) {
-        console.log('Error consuming messages, logging...', err.message);
+      if (msg) {
+        await this.handleMessage(msg, consumer);
       }
     });
   }
@@ -71,5 +67,19 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap {
       transaction: serializedTransaction,
       payee: serializedPayee,
     };
+  }
+
+  private async handleMessage(msg: ConsumeMessage, consumer: Channel) {
+    try {
+      // Serialize again the parsed message into a full Transaction instance witth getters and setters
+      const { transaction, payee } =
+        this.serializeStringToTransactionAndPayeeEntities(msg);
+      // Then call notification service to notificate user
+      consumer.ack(msg);
+      await this.notification.notificate(transaction, payee);
+    } catch (err: any) {
+      console.log('Error consuming messages, logging...', err.message);
+      consumer.nack(msg, false, false);
+    }
   }
 }
