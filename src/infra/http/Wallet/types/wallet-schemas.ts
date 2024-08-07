@@ -28,10 +28,13 @@ export const createWalletSchema = extendApi(
       .optional()
       .openapi({ example: '00.000.000/0000-00' }),
     password: z.string().min(8).openapi({ example: '12345678' }),
-    balance: z.number().refine(
-      (value) => value * 100 - Math.trunc(value * 100) < Number.EPSILON,
-      (val) => ({ message: `${val} needs to have 2 decimal places` }),
-    ),
+    balance: z
+      .number()
+      .positive()
+      .refine(
+        (value) => value * 100 - Math.trunc(value * 100) < Number.EPSILON,
+        (val) => ({ message: `${val} needs to have 2 decimal places` }),
+      ),
   }),
 );
 
