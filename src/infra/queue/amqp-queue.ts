@@ -1,47 +1,76 @@
 import { Queue } from '@/domain/application/gateways/queue/queue';
-import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
-import { Channel, ConsumeMessage, connect } from 'amqplib';
+import {
+  Injectable,
+  OnApplicationBootstrap,
+  OnModuleDestroy,
+} from '@nestjs/common';
+import * as crypto from 'node:crypto';
+import { Channel, Connection, ConsumeMessage, connect } from 'amqplib';
 import { EnvService } from '../env/env.service';
 import { Transaction } from '@/domain/enterprise/entities/transaction';
 import { Notification } from '@/domain/application/gateways/notification/notification';
 import { Wallet } from '@/domain/enterprise/entities/wallet';
 
 @Injectable()
-export class AmqpQueue implements Queue, OnApplicationBootstrap {
+export class AmqpQueue
+  implements Queue, OnApplicationBootstrap, OnModuleDestroy
+{
+  private connection: Connection | undefined = undefined;
+  private producer: Channel | undefined = undefined;
+  private consumer: Channel | undefined = undefined;
+
   constructor(
     private readonly envService: EnvService,
     private readonly notification: Notification,
   ) {}
 
-  onApplicationBootstrap() {
-    this.consume('create-transaction');
+  async onApplicationBootstrap() {
+    await this.initialize();
+  }
+
+  async onModuleDestroy() {
+    await this.producer?.close();
+    await this.consumer?.close();
+    await this.connection?.close();
+  }
+
+  private async initialize() {
+    this.connection = await connect(this.envService.get('RABBITMQ_URL'));
+    this.connection.setMaxListeners(15);
+    this.producer = await this.connection.createChannel();
+    this.consumer = await this.connection.createChannel();
+    await this.consume('create-transaction');
   }
 
   async produce(topic: string, message: Buffer): Promise<void> {
-    const connection = await connect(this.envService.get('RABBITMQ_URL'));
+    if (!this.producer) return;
+    // this.producer = await this.connection.createChannel();
 
-    const producer = await connection.createChannel();
+    await this.producer.assertQueue(topic);
 
-    await producer.assertQueue(topic);
-
-    producer.sendToQueue(topic, message);
-    await producer.close();
+    this.producer.sendToQueue(topic, message);
   }
 
   async consume(topic: string): Promise<void> {
-    const connection = await connect(this.envService.get('RABBITMQ_URL'));
+    console.log(process.listenerCount('create-transaction'));
+    if (!this.consumer) return;
     const dlqName = topic.concat('.dlx');
-    const consumer = await connection.createChannel();
+    // this.consumer = await this.connection.createChannel();
 
     //Queue setup
-    await consumer.assertQueue(topic, {
+    await this.consumer.assertExchange('dlx', 'fanout', { durable: true });
+    await this.consumer.assertQueue(dlqName, {
       durable: true,
-      deadLetterRoutingKey: dlqName,
+      deadLetterExchange: 'dlx',
+    });
+    await this.consumer.assertQueue(topic, {
+      durable: true,
     });
 
-    await consumer.consume(topic, async (msg) => {
+    await this.consumer.consume(topic, async (msg) => {
       if (msg) {
-        await this.handleMessage(msg, consumer);
+        if (!this.consumer) return;
+        await this.handleMessage(msg, dlqName);
       }
     });
   }
@@ -69,17 +98,38 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap {
     };
   }
 
-  private async handleMessage(msg: ConsumeMessage, consumer: Channel) {
+  private async handleMessage(
+    msg: ConsumeMessage,
+    // consumer: Channel,
+    dlqName: string,
+  ) {
+    if (!this.consumer) return;
     try {
       // Serialize again the parsed message into a full Transaction instance witth getters and setters
       const { transaction, payee } =
         this.serializeStringToTransactionAndPayeeEntities(msg);
       // Then call notification service to notificate user
-      consumer.ack(msg);
+      // throw new Error('Error sending notification, sending to DLQ');
+      this.generateRandomError();
+      this.consumer?.ack(msg);
       await this.notification.notificate(transaction, payee);
     } catch (err: any) {
       console.log('Error consuming messages, logging...', err.message);
-      consumer.nack(msg, false, false);
+      this.consumer.nack(msg, false, false);
+      this.consumer.sendToQueue(dlqName, Buffer.from(JSON.stringify(msg)));
+    }
+  }
+
+  private generateRandomError() {
+    const randomBytes = crypto.randomBytes(4);
+    const randomNumber = parseFloat(
+      (randomBytes.readUInt32BE() / 0xffffffff).toFixed(2),
+    );
+    const errorProbability = 0.6; // Probabilidade de 20% de ocorrer um erro
+    console.log('val do erro é ', randomNumber);
+    if (randomNumber < errorProbability) {
+      // Simular um erro
+      throw new Error('Error sending notification, sending to DLQ');
     }
   }
 }
