@@ -4,7 +4,7 @@ import {
   OnApplicationBootstrap,
   OnModuleDestroy,
 } from '@nestjs/common';
-import * as crypto from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 import { Channel, Connection, ConsumeMessage, connect } from 'amqplib';
 import { EnvService } from '../env/env.service';
 import { Transaction } from '@/domain/enterprise/entities/transaction';
@@ -121,11 +121,11 @@ export class AmqpQueue
   }
 
   private generateRandomError() {
-    const randomBytes = crypto.randomBytes(4);
+    const generatedRandomBytes = randomBytes(4);
     const randomNumber = parseFloat(
-      (randomBytes.readUInt32BE() / 0xffffffff).toFixed(2),
+      (generatedRandomBytes.readUInt32BE() / 0xffffffff).toFixed(2),
     );
-    const errorProbability = 0.6; // Probabilidade de 20% de ocorrer um erro
+    const errorProbability = 0.6; // Probabilidade de ocorrer um erro
     console.log('val do erro é ', randomNumber);
     if (randomNumber < errorProbability) {
       // Simular um erro
