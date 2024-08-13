@@ -8,12 +8,15 @@ export const makeTransactionSchema = extendApi(
     payee: z.string().uuid(),
     amount: z
       .number()
-      .positive()
-      .refine(
-        (value) => value * 100 - Math.trunc(value * 100) < Number.EPSILON,
-        (val) => ({ message: `${val} needs to have 2 decimal places` }),
-      ),
-    // .transform((val) => Number(val)),
+      .positive() // Garante que o número seja positivo
+      .transform((val) => {
+        const decimalPart = val - Math.trunc(val);
+        // Se tiver uma casa decimal, adiciona um zero
+        return decimalPart.toFixed(1) === decimalPart.toString()
+          ? val.toFixed(2)
+          : val.toFixed(2);
+      })
+      .transform((val) => parseFloat(val)),
   }),
 );
 
