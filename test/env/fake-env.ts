@@ -1,5 +1,11 @@
-export class FakeEnv {
+import { CoreEnv } from '@/core/env/env';
+
+type FakeEnvProps = {
+  fakeURL: string;
+};
+
+export class FakeEnv implements CoreEnv<FakeEnvProps> {
   get() {
-    return 'http://my-fake-url.com';
+    return 'http://myfakeurl.com';
   }
 }

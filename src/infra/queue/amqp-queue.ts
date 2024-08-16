@@ -6,10 +6,11 @@ import {
 } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
 import { Channel, Connection, ConsumeMessage, connect } from 'amqplib';
-import { EnvService } from '../env/env.service';
 import { Transaction } from '@/domain/enterprise/entities/transaction';
 import { Notification } from '@/domain/application/gateways/notification/notification';
 import { Wallet } from '@/domain/enterprise/entities/wallet';
+import { CoreEnv } from '@/core/env/env';
+import { Env } from '../env/env-schema';
 
 @Injectable()
 export class AmqpQueue
@@ -20,7 +21,7 @@ export class AmqpQueue
   private consumer: Channel | undefined = undefined;
 
   constructor(
-    private readonly envService: EnvService,
+    private readonly envService: CoreEnv<Env>,
     private readonly notification: Notification,
   ) {}
 
@@ -52,7 +53,6 @@ export class AmqpQueue
   }
 
   async consume(topic: string): Promise<void> {
-    console.log(process.listenerCount('create-transaction'));
     if (!this.consumer) return;
     const dlqName = topic.concat('.dlx');
     // this.consumer = await this.connection.createChannel();

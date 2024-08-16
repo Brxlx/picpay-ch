@@ -4,13 +4,14 @@ import { WalletsRepository } from '../../repositories/wallets-repository';
 import { Transaction } from '@/domain/enterprise/entities/transaction';
 import { WALLET_TYPE } from '@/core/types/wallet-type';
 import { Authorizer } from '../../gateways/authorizer/authorize';
-import { EnvService } from '@/infra/env/env.service';
 import { TransactionNotAuthorizedError } from '../errors/transaction-not-authorized-error';
 import { UserOnTransactionNotFoundError } from '../errors/user-on-transacton-not-found-error';
 import { InvalidUserTypeOnTranferError } from '../errors/invalid-user-type-on-transfer-error';
 import { InsuficientBalanceError } from '../errors/insuficient-balance-error';
 import { Queue } from '../../gateways/queue/queue';
 import { SamePayerAndPayeeIdError } from '../errors/same-payer-and-payee-id-error';
+import { CoreEnv } from '@/core/env/env';
+import { Env } from '@/infra/env/env-schema';
 
 interface MakeTransactionUseCaseRequest {
   payer: string;
@@ -26,7 +27,7 @@ export class MakeTransactionUseCase {
   constructor(
     private readonly transactionRepository: TransactionRepository,
     private readonly walletsRepository: WalletsRepository,
-    private readonly envService: EnvService,
+    private readonly envService: CoreEnv<Env>,
     private readonly authorizer: Authorizer,
     private readonly queue: Queue,
   ) {}
@@ -85,6 +86,10 @@ export class MakeTransactionUseCase {
     });
 
     // First authorize transaction
+    console.log(
+      'authorizer: ',
+      this.envService.get('TRANSFER_AUTHORIZER_URL_MOCK'),
+    );
     const { isAuthorized } = await this.authorizeTransaction(
       transaction,
       this.envService.get('TRANSFER_AUTHORIZER_URL_MOCK'),

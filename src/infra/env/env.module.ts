@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { EnvService } from './env.service';
 import { ConfigModule } from '@nestjs/config';
 import { envSchema } from './env-schema';
+import { CoreEnv } from '@/core/env/env';
 
 @Module({
   imports: [
@@ -11,7 +12,7 @@ import { envSchema } from './env-schema';
       cache: true,
     }),
   ],
-  providers: [EnvService],
-  exports: [EnvService],
+  providers: [{ provide: CoreEnv, useClass: EnvService }, EnvService],
+  exports: [CoreEnv, EnvService],
 })
 export class EnvModule {}
