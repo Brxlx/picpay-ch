@@ -1,7 +1,8 @@
-import { Identifiers } from '@/infra/helpers/Identifiers';
 import { createZodDto } from '@anatine/zod-nestjs';
 import { extendApi, extendZodWithOpenApi } from '@anatine/zod-openapi';
 import { z } from 'zod';
+
+import { Identifiers } from '@/infra/helpers/Identifiers';
 
 extendZodWithOpenApi(z);
 

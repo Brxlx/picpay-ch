@@ -1,15 +1,18 @@
-import { Queue } from '@/domain/application/gateways/queue/queue';
+import { randomBytes } from 'node:crypto';
+
 import {
   Injectable,
   OnApplicationBootstrap,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { randomBytes } from 'node:crypto';
-import { Channel, Connection, ConsumeMessage, connect } from 'amqplib';
-import { Transaction } from '@/domain/enterprise/entities/transaction';
-import { Notification } from '@/domain/application/gateways/notification/notification';
-import { Wallet } from '@/domain/enterprise/entities/wallet';
+import { Channel, connect, Connection, ConsumeMessage } from 'amqplib';
+
 import { CoreEnv } from '@/core/env/env';
+import { Notification } from '@/domain/application/gateways/notification/notification';
+import { Queue } from '@/domain/application/gateways/queue/queue';
+import { Transaction } from '@/domain/enterprise/entities/transaction';
+import { Wallet } from '@/domain/enterprise/entities/wallet';
+
 import { Env } from '../env/env-schema';
 
 @Injectable()

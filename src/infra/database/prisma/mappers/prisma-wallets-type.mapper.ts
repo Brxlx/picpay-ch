@@ -1,8 +1,8 @@
 import { Prisma, WalletType as PrismaWalletsType } from '@prisma/client';
 
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
-import { WalletType } from '@/domain/enterprise/entities/wallet-type';
 import { WALLET_TYPE } from '@/core/types/wallet-type';
+import { WalletType } from '@/domain/enterprise/entities/wallet-type';
 
 export class PrismaWalletsTypeMapper {
   static toDomain(raw: PrismaWalletsType): WalletType {

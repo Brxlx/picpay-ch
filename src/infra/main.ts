@@ -1,8 +1,9 @@
-import { NestFactory } from '@nestjs/core';
 import { patchNestjsSwagger } from '@anatine/zod-nestjs';
-import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+import { AppModule } from './app.module';
 import { EnvService } from './env/env.service';
 
 async function bootstrap() {

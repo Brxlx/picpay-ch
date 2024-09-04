@@ -1,6 +1,7 @@
+import { Logger } from '@nestjs/common';
+
 import { Authorizer } from '@/domain/application/gateways/authorizer/authorize';
 import { Transaction } from '@/domain/enterprise/entities/transaction';
-import { Logger } from '@nestjs/common';
 
 export class PicPayAuthorizer implements Authorizer {
   private logger: Logger = new Logger(PicPayAuthorizer.name);

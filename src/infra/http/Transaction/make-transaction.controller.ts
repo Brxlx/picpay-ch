@@ -7,8 +7,6 @@ import {
   InternalServerErrorException,
   Post,
 } from '@nestjs/common';
-import { MakeTransactionService } from './make-transaction.service';
-import { ZodValidationPipe } from '../pipes/zod-validation.pipe';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -16,17 +14,21 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+
+import { InsuficientBalanceError } from '@/domain/application/use-cases/errors/insuficient-balance-error';
+import { InvalidUserTypeOnTranferError } from '@/domain/application/use-cases/errors/invalid-user-type-on-transfer-error';
+import { SamePayerAndPayeeIdError } from '@/domain/application/use-cases/errors/same-payer-and-payee-id-error';
 import { TransactionNotAuthorizedError } from '@/domain/application/use-cases/errors/transaction-not-authorized-error';
 import { UserOnTransactionNotFoundError } from '@/domain/application/use-cases/errors/user-on-transacton-not-found-error';
-import { InvalidUserTypeOnTranferError } from '@/domain/application/use-cases/errors/invalid-user-type-on-transfer-error';
+
+import { ZodValidationPipe } from '../pipes/zod-validation.pipe';
+import { MakeTransactionService } from './make-transaction.service';
 import {
   MakeTransactionDTO,
   MakeTransactionResponse,
   MakeTransactionSchema,
   makeTransactionSchema,
 } from './types/transaction-schemas';
-import { InsuficientBalanceError } from '@/domain/application/use-cases/errors/insuficient-balance-error';
-import { SamePayerAndPayeeIdError } from '@/domain/application/use-cases/errors/same-payer-and-payee-id-error';
 
 @Controller('/tranfer')
 export class MakeTransactionController {

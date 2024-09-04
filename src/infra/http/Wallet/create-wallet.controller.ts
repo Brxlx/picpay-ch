@@ -7,7 +7,6 @@ import {
   InternalServerErrorException,
   Post,
 } from '@nestjs/common';
-import { CreateWalletService } from './create-wallet.service';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -15,15 +14,18 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+
+import { EmailAlreadyExistsError } from '@/domain/application/use-cases/errors/email-already-exists-error';
+import { InvalidIdentifierError } from '@/domain/application/use-cases/errors/invalid-identifier-error';
+import { WalletAccountExistsError } from '@/domain/application/use-cases/errors/wallet-account-exists-error';
+
+import { ZodValidationPipe } from '../pipes/zod-validation.pipe';
+import { CreateWalletService } from './create-wallet.service';
 import {
   CreateWalletDTO,
   CreateWalletSchema,
   createWalletSchema,
 } from './types/wallet-schemas';
-import { ZodValidationPipe } from '../pipes/zod-validation.pipe';
-import { InvalidIdentifierError } from '@/domain/application/use-cases/errors/invalid-identifier-error';
-import { WalletAccountExistsError } from '@/domain/application/use-cases/errors/wallet-account-exists-error';
-import { EmailAlreadyExistsError } from '@/domain/application/use-cases/errors/email-already-exists-error';
 
 @Controller('/wallets')
 export class CreateWalletController {

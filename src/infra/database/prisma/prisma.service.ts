@@ -1,4 +1,3 @@
-import { EnvService } from '@/infra/env/env.service';
 import {
   Injectable,
   Logger,
@@ -6,6 +5,8 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
+
+import { EnvService } from '@/infra/env/env.service';
 
 @Injectable()
 export class PrismaService

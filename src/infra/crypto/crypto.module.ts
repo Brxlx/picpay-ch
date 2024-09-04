@@ -1,7 +1,9 @@
-import { HashComparer } from '@/domain/application/gateways/crypto/hash-comparer';
 import { Module } from '@nestjs/common';
-import { BcryptHasher } from './bcrypt-hasher';
+
+import { HashComparer } from '@/domain/application/gateways/crypto/hash-comparer';
 import { HashGenerator } from '@/domain/application/gateways/crypto/hash-generator';
+
+import { BcryptHasher } from './bcrypt-hasher';
 
 @Module({
   providers: [

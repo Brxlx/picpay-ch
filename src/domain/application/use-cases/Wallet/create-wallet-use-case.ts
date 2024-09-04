@@ -1,12 +1,13 @@
-import { Wallet } from '@/domain/enterprise/entities/wallet';
-import { WalletsRepository } from '../../repositories/wallets-repository';
-import { HashGenerator } from '../../gateways/crypto/hash-generator';
-import { WalletsTypeRepository } from '../../repositories/wallets-type.repository';
 import { WALLET_TYPE } from '@/core/types/wallet-type';
+import { Wallet } from '@/domain/enterprise/entities/wallet';
 import { Identifiers } from '@/infra/helpers/Identifiers';
+
+import { HashGenerator } from '../../gateways/crypto/hash-generator';
+import { WalletsRepository } from '../../repositories/wallets-repository';
+import { WalletsTypeRepository } from '../../repositories/wallets-type.repository';
+import { EmailAlreadyExistsError } from '../errors/email-already-exists-error';
 import { InvalidIdentifierError } from '../errors/invalid-identifier-error';
 import { WalletAccountExistsError } from '../errors/wallet-account-exists-error';
-import { EmailAlreadyExistsError } from '../errors/email-already-exists-error';
 
 interface CreateWalletUseCaseRequest {
   fullName: string;

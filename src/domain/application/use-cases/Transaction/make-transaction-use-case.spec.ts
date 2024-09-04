@@ -1,17 +1,19 @@
-import { Identifiers } from '@/infra/helpers/Identifiers';
-import { MakeTransactionUseCase } from './make-transaction-use-case';
+import { FakeAuthorizer } from 'test/authorizer/fake-authorizer';
+import { FakeEnv } from 'test/env/fake-env';
+import { makeTransaction } from 'test/factories/make-transaction-factory';
 import { makeWallet } from 'test/factories/make-wallet-factory';
+import { FakeNotification } from 'test/notification/fake-notification';
+import { FakeQueue } from 'test/queue/fake-queue';
 import { InMemoryTransactionsRepository } from 'test/repositories/in-memory-transactions.repository';
 import { InMemoryWalletsRepository } from 'test/repositories/in-memory-wallets-repository';
-import { FakeAuthorizer } from 'test/authorizer/fake-authorizer';
+
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
-import { FakeEnv } from 'test/env/fake-env';
 import { EnvService } from '@/infra/env/env.service';
-import { makeTransaction } from 'test/factories/make-transaction-factory';
-import { InvalidUserTypeOnTranferError } from '../errors/invalid-user-type-on-transfer-error';
+import { Identifiers } from '@/infra/helpers/Identifiers';
+
 import { InsuficientBalanceError } from '../errors/insuficient-balance-error';
-import { FakeQueue } from 'test/queue/fake-queue';
-import { FakeNotification } from 'test/notification/fake-notification';
+import { InvalidUserTypeOnTranferError } from '../errors/invalid-user-type-on-transfer-error';
+import { MakeTransactionUseCase } from './make-transaction-use-case';
 
 let PAYER_INITIAL_AMOUNT: number;
 let PAYEE_INITIAL_AMOUNT: number;

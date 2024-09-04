@@ -1,17 +1,18 @@
+import { CoreEnv } from '@/core/env/env';
+import { WALLET_TYPE } from '@/core/types/wallet-type';
+import { Transaction } from '@/domain/enterprise/entities/transaction';
 import { Wallet } from '@/domain/enterprise/entities/wallet';
+import { Env } from '@/infra/env/env-schema';
+
+import { Authorizer } from '../../gateways/authorizer/authorize';
+import { Queue } from '../../gateways/queue/queue';
 import { TransactionRepository } from '../../repositories/transaction.repository';
 import { WalletsRepository } from '../../repositories/wallets-repository';
-import { Transaction } from '@/domain/enterprise/entities/transaction';
-import { WALLET_TYPE } from '@/core/types/wallet-type';
-import { Authorizer } from '../../gateways/authorizer/authorize';
+import { InsuficientBalanceError } from '../errors/insuficient-balance-error';
+import { InvalidUserTypeOnTranferError } from '../errors/invalid-user-type-on-transfer-error';
+import { SamePayerAndPayeeIdError } from '../errors/same-payer-and-payee-id-error';
 import { TransactionNotAuthorizedError } from '../errors/transaction-not-authorized-error';
 import { UserOnTransactionNotFoundError } from '../errors/user-on-transacton-not-found-error';
-import { InvalidUserTypeOnTranferError } from '../errors/invalid-user-type-on-transfer-error';
-import { InsuficientBalanceError } from '../errors/insuficient-balance-error';
-import { Queue } from '../../gateways/queue/queue';
-import { SamePayerAndPayeeIdError } from '../errors/same-payer-and-payee-id-error';
-import { CoreEnv } from '@/core/env/env';
-import { Env } from '@/infra/env/env-schema';
 
 interface MakeTransactionUseCaseRequest {
   payer: string;

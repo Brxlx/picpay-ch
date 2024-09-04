@@ -1,5 +1,7 @@
-import { Notification } from '@/domain/application/gateways/notification/notification';
 import { Module } from '@nestjs/common';
+
+import { Notification } from '@/domain/application/gateways/notification/notification';
+
 import { PicPayNotification } from './picpay-notification';
 
 @Module({

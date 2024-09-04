@@ -1,8 +1,9 @@
 import { Entity } from '@/core/entities/entity';
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { Optional } from '@/core/types/optional';
-import { WalletType } from './wallet-type';
 import { WALLET_TYPE } from '@/core/types/wallet-type';
+
+import { WalletType } from './wallet-type';
 
 export interface WalletProps {
   fullName: string;

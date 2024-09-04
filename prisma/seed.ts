@@ -1,6 +1,7 @@
-import { Identifiers } from '../src/infra/helpers/Identifiers';
 import { PrismaClient } from '@prisma/client';
+
 import { BcryptHasher } from '../src/infra/crypto/bcrypt-hasher';
+import { Identifiers } from '../src/infra/helpers/Identifiers';
 
 const prisma = new PrismaClient();
 

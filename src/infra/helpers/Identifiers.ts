@@ -1,11 +1,11 @@
 import {
-  validate as validateCPF,
-  fake as generateCPF,
-} from 'validation-br/dist/cpf';
-import {
-  validate as validateCNPJ,
   fake as generateCNPJ,
+  validate as validateCNPJ,
 } from 'validation-br/dist/cnpj';
+import {
+  fake as generateCPF,
+  validate as validateCPF,
+} from 'validation-br/dist/cpf';
 
 export class Identifiers {
   /**

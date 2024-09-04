@@ -1,7 +1,9 @@
+import { Logger } from '@nestjs/common';
+
 import { Notification } from '@/domain/application/gateways/notification/notification';
 import { Transaction } from '@/domain/enterprise/entities/transaction';
 import { Wallet } from '@/domain/enterprise/entities/wallet';
-import { Logger } from '@nestjs/common';
+
 import { Format } from '../helpers/Format';
 
 export class PicPayNotification implements Notification {

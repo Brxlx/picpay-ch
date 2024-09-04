@@ -1,18 +1,20 @@
-import { DatabaseModule } from '@/infra/database/database.module';
 import { Module } from '@nestjs/common';
-import { MakeTransactionController } from './make-transaction.controller';
-import { MakeTransactionService } from './make-transaction.service';
-import { TransactionRepository } from '@/domain/application/repositories/transaction.repository';
-import { WalletsRepository } from '@/domain/application/repositories/wallets-repository';
+
+import { CoreEnv } from '@/core/env/env';
 import { Authorizer } from '@/domain/application/gateways/authorizer/authorize';
 import { Notification } from '@/domain/application/gateways/notification/notification';
-import { EnvModule } from '@/infra/env/env.module';
+import { Queue } from '@/domain/application/gateways/queue/queue';
+import { TransactionRepository } from '@/domain/application/repositories/transaction.repository';
+import { WalletsRepository } from '@/domain/application/repositories/wallets-repository';
 import { AuthorizerModule } from '@/infra/authorizer/authorizer.module';
+import { DatabaseModule } from '@/infra/database/database.module';
+import { EnvModule } from '@/infra/env/env.module';
+import { Env } from '@/infra/env/env-schema';
 import { NotificationModule } from '@/infra/notification/notification.module';
 import { QueueModule } from '@/infra/queue/queue.module';
-import { Queue } from '@/domain/application/gateways/queue/queue';
-import { CoreEnv } from '@/core/env/env';
-import { Env } from '@/infra/env/env-schema';
+
+import { MakeTransactionController } from './make-transaction.controller';
+import { MakeTransactionService } from './make-transaction.service';
 
 @Module({
   imports: [

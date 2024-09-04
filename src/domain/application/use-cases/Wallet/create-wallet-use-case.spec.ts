@@ -1,10 +1,11 @@
 import { FakeHasher } from 'test/crypto/fake-hasher';
+import { makeWallet } from 'test/factories/make-wallet-factory';
 import { InMemoryWalletsRepository } from 'test/repositories/in-memory-wallets-repository';
+import { InMemoryWalletsTypeRepository } from 'test/repositories/in-memory-wallets-type.repository';
+
+import { Identifiers } from '@/infra/helpers/Identifiers';
 
 import { CreateWalletUseCase } from './create-wallet-use-case';
-import { makeWallet } from 'test/factories/make-wallet-factory';
-import { Identifiers } from '@/infra/helpers/Identifiers';
-import { InMemoryWalletsTypeRepository } from 'test/repositories/in-memory-wallets-type.repository';
 
 let inMemoryWalletsRepository: InMemoryWalletsRepository;
 let inMemoryWalletsTypeRepository: InMemoryWalletsTypeRepository;

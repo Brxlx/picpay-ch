@@ -1,9 +1,11 @@
+import { Injectable } from '@nestjs/common';
+import { WALLET_TYPE } from '@prisma/client';
+
 import { WalletsTypeRepository } from '@/domain/application/repositories/wallets-type.repository';
 import { WalletType } from '@/domain/enterprise/entities/wallet-type';
-import { PrismaService } from '../prisma.service';
-import { WALLET_TYPE } from '@prisma/client';
+
 import { PrismaWalletsTypeMapper } from '../mappers/prisma-wallets-type.mapper';
-import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class PrismaWalletsTypeRepository implements WalletsTypeRepository {
