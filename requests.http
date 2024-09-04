@@ -18,7 +18,7 @@ Content-Type: application/json
   "fullName": "Bruno Santos",
   "email": "bruno@email.com",
   "password": "12345678",
-  "cpf": "558.199.350-55"
+  "cpf": "875.489.460-31"
 }
 
 
@@ -27,9 +27,9 @@ POST http://localhost:3000/tranfer
 Content-Type: application/json
 
 {
-  "payer": "4aa7d52d-f81f-46f3-9323-8149743489a2",
-  "payee": "92cb3ba1-e175-4100-a92b-022fe1d1e403",
-  "amount": 10
+  "payer": "0db8d7bd-d28b-4f18-85b9-6f5064e721a2",
+  "payee": "840a1b89-faf3-415c-9f7d-8eae29501bc8",
+  "amount": 100
 }
 
 ###

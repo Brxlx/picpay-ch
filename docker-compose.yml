@@ -15,7 +15,10 @@ services:
       - DATABASE_URL=postgresql://$DB_USER}:${DB_PASS}@host.docker.internal:5432/${DB_DB}?schema=public
 
   queue:
-    image: rabbitmq:3.13-management
+    image: rabbitmq:3.13.7-management
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.queue
     container_name: queue
     ports:
       - "5672:5672"

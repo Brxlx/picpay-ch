@@ -1,0 +1,9 @@
+FROM rabbitmq:3.13.7-management
+
+# RUN rabbitmqctl install_plugin rabbitmq_delayed_message_exchange \
+#   && rabbitmqctl enable_plugin rabbitmq_delayed_message_exchange
+RUN rabbitmq-plugins install rabbitmq_delayed_message_exchange \
+  && rabbitmq-plugins enable rabbitmq_delayed_message_exchange;
+# Adicione outras configurações do RabbitMQ aqui, se necessário
+
+EXPOSE 5672 15672
