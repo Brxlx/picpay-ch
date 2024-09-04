@@ -30,7 +30,9 @@ export const createWalletSchema = extendApi(
     password: z.string().min(8).openapi({ example: '12345678' }),
     balance: z
       .number()
-      .positive() // Garante que o número seja positivo
+      .nonnegative() // Garante que o número seja positivo
+      .optional()
+      .default(0)
       .transform((val) => {
         const decimalPart = val - Math.trunc(val);
         // Se tiver uma casa decimal, adiciona um zero
