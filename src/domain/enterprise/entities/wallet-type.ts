@@ -11,10 +11,6 @@ export class WalletType extends Entity<WalletTypeProps> {
     return this.props.description;
   }
 
-  set description(description: WALLET_TYPE) {
-    this.description = description;
-  }
-
   static create(props: WalletTypeProps, id?: UniqueEntityID) {
     return new WalletType(
       {
