@@ -5,5 +5,6 @@ export class InsuficientBalanceError extends Error implements UseCaseError {
 
   constructor() {
     super();
+    this.message = this.message;
   }
 }

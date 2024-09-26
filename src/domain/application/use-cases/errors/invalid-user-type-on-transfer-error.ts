@@ -5,4 +5,8 @@ export class InvalidUserTypeOnTranferError
   implements UseCaseError
 {
   message: string = 'Merchants can NOT transfer';
+  constructor() {
+    super();
+    this.message = this.message;
+  }
 }
