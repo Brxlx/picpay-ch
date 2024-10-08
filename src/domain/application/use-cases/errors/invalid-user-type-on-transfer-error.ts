@@ -1,12 +1,11 @@
+import { UseCaseErrorMessages } from '@/core/consts/use-case-error-messages';
 import { UseCaseError } from '@/core/errors/use-case-error';
 
 export class InvalidUserTypeOnTranferError
   extends Error
   implements UseCaseError
 {
-  message: string = 'Merchants can NOT transfer';
   constructor() {
-    super();
-    this.message = this.message;
+    super(UseCaseErrorMessages.INVALID_USER_TYPE_ON_TRANSFER_ERROR);
   }
 }
