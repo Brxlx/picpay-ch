@@ -20,11 +20,7 @@ import { CreateWalletService } from './create-wallet.service';
         walletsTypeRepository: WalletsTypeRepository,
         hashGenerator: HashGenerator,
       ) => {
-        return new CreateWalletService(
-          walletsRepository,
-          walletsTypeRepository,
-          hashGenerator,
-        );
+        return new CreateWalletService(walletsRepository, walletsTypeRepository, hashGenerator);
       },
       inject: [WalletsRepository, WalletsTypeRepository, HashGenerator],
     },

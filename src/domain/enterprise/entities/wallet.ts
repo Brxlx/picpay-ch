@@ -77,10 +77,7 @@ export class Wallet extends Entity<WalletProps> {
     this.props.updatedAt = new Date();
   }
 
-  static create(
-    props: Optional<WalletProps, 'walletType' | 'createdAt'>,
-    id?: UniqueEntityID,
-  ) {
+  static create(props: Optional<WalletProps, 'walletType' | 'createdAt'>, id?: UniqueEntityID) {
     return new Wallet(
       {
         ...props,

@@ -62,8 +62,7 @@ export class CreateWalletUseCase {
   }
 
   private async validateCpf(cpf: string) {
-    if (!Identifiers.validateCPF(cpf))
-      throw new InvalidIdentifierError('Invalid CPF');
+    if (!Identifiers.validateCPF(cpf)) throw new InvalidIdentifierError('Invalid CPF');
     const cpfWalletOnDb = await this.walletsRepository.findByCpfCnpj(cpf);
     if (cpfWalletOnDb) throw new WalletAccountExistsError();
 
@@ -72,8 +71,7 @@ export class CreateWalletUseCase {
 
   private async validateCnpj(cnpj: string) {
     if (cnpj) {
-      if (!Identifiers.validateCNPJ(cnpj))
-        throw new InvalidIdentifierError('Invalid CNPJ');
+      if (!Identifiers.validateCNPJ(cnpj)) throw new InvalidIdentifierError('Invalid CNPJ');
       const cnpjWalletOnDb = await this.walletsRepository.findByCpfCnpj(cnpj);
       if (cnpjWalletOnDb) throw new WalletAccountExistsError();
 

@@ -6,9 +6,7 @@ import { WalletType } from '@/domain/enterprise/entities/wallet-type';
 export class InMemoryWalletsTypeRepository implements WalletsTypeRepository {
   public items: WalletType[] = [];
 
-  async findByDescription(
-    description: WALLET_TYPE,
-  ): Promise<WalletType | null> {
+  async findByDescription(description: WALLET_TYPE): Promise<WalletType | null> {
     const walletType = WalletType.create(
       { description: description },
       new UniqueEntityID(description),

@@ -26,10 +26,7 @@ export class Transaction extends Entity<TransactionProps> {
     return this.props.createdAt;
   }
 
-  static create(
-    props: Optional<TransactionProps, 'createdAt'>,
-    id?: UniqueEntityID,
-  ) {
+  static create(props: Optional<TransactionProps, 'createdAt'>, id?: UniqueEntityID) {
     return new Transaction(
       {
         ...props,

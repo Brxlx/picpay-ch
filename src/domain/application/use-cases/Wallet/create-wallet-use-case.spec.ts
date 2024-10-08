@@ -39,9 +39,7 @@ suite('[Wallet]', () => {
       expect(result).toEqual({
         wallet: inMemoryWalletsRepository.items[0],
       });
-      expect(result.wallet.id.toString()).toEqual(
-        inMemoryWalletsRepository.items[0].id.toString(),
-      );
+      expect(result.wallet.id.toString()).toEqual(inMemoryWalletsRepository.items[0].id.toString());
     });
     it('should be able to create a new merchant wallet', async () => {
       const newWallet = await makeWallet({
@@ -56,9 +54,7 @@ suite('[Wallet]', () => {
       expect(result).toEqual({
         wallet: inMemoryWalletsRepository.items[0],
       });
-      expect(result.wallet.id.toString()).toEqual(
-        inMemoryWalletsRepository.items[0].id.toString(),
-      );
+      expect(result.wallet.id.toString()).toEqual(inMemoryWalletsRepository.items[0].id.toString());
     });
 
     it('should hash wallet password upon registration', async () => {
@@ -80,10 +76,7 @@ suite('[Wallet]', () => {
       const newWallet = await makeWallet({ password: '12345678' });
 
       const hashedPassword = await fakeHasher.hash(newWallet.password);
-      const compared = await fakeHasher.compare(
-        newWallet.password,
-        hashedPassword,
-      );
+      const compared = await fakeHasher.compare(newWallet.password, hashedPassword);
 
       expect(compared).toBeTruthy();
     });

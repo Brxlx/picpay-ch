@@ -44,11 +44,7 @@ export class MakeTransactionUseCase {
     const payeeInDb = await this.verifyReceiver(payee);
 
     await this.verifyPayerBalance(payerInDb, amount);
-    const { isAuthorized } = await this.makeTransaction(
-      payerInDb,
-      payeeInDb,
-      amount,
-    );
+    const { isAuthorized } = await this.makeTransaction(payerInDb, payeeInDb, amount);
 
     return { isAuthorized };
   }
@@ -56,23 +52,20 @@ export class MakeTransactionUseCase {
   private async verifySender(senderId: string) {
     const sender = await this.walletsRepository.findById(senderId);
     if (!sender) throw new UserOnTransactionNotFoundError('Sender not found');
-    if (sender.walletType === WALLET_TYPE.MERCHANT)
-      throw new InvalidUserTypeOnTranferError();
+    if (sender.walletType === WALLET_TYPE.MERCHANT) throw new InvalidUserTypeOnTranferError();
 
     return sender;
   }
 
   private async verifyReceiver(receiverId: string) {
     const receiver = await this.walletsRepository.findById(receiverId);
-    if (!receiver)
-      throw new UserOnTransactionNotFoundError('Receiver not found');
+    if (!receiver) throw new UserOnTransactionNotFoundError('Receiver not found');
 
     return receiver;
   }
 
   private async verifyPayerBalance(payer: Wallet, amount: number) {
-    if (payer.balance <= 0 || payer.balance < amount)
-      throw new InsuficientBalanceError();
+    if (payer.balance <= 0 || payer.balance < amount) throw new InsuficientBalanceError();
   }
 
   private async makeTransaction(payer: Wallet, payee: Wallet, amount: number) {
@@ -87,10 +80,7 @@ export class MakeTransactionUseCase {
     });
 
     // First authorize transaction
-    console.log(
-      'authorizer: ',
-      this.envService.get('TRANSFER_AUTHORIZER_URL_MOCK'),
-    );
+    console.log('authorizer: ', this.envService.get('TRANSFER_AUTHORIZER_URL_MOCK'));
     const { isAuthorized } = await this.authorizeTransaction(
       transaction,
       this.envService.get('TRANSFER_AUTHORIZER_URL_MOCK'),

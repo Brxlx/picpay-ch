@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
-import { PicPayAuthorizer } from './picpay-authorizer';
+
 import { Authorizer } from '@/domain/application/gateways/authorizer/authorize';
+
+import { PicPayAuthorizer } from './picpay-authorizer';
 
 @Module({
   providers: [{ provide: Authorizer, useClass: PicPayAuthorizer }],

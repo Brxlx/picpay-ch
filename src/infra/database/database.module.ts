@@ -18,11 +18,6 @@ import { PrismaWalletsRepository } from './prisma/repositories/prisma-wallets.re
     { provide: WalletsTypeRepository, useClass: PrismaWalletsTypeRepository },
     { provide: TransactionRepository, useClass: PrismaTransactionRepository },
   ],
-  exports: [
-    PrismaService,
-    WalletsRepository,
-    WalletsTypeRepository,
-    TransactionRepository,
-  ],
+  exports: [PrismaService, WalletsRepository, WalletsTypeRepository, TransactionRepository],
 })
 export class DatabaseModule {}

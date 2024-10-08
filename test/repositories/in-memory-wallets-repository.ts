@@ -19,9 +19,7 @@ export class InMemoryWalletsRepository implements WalletsRepository {
     return user;
   }
   async findByCpfCnpj(cpfcnpf: string): Promise<Wallet | null> {
-    const user = this.items.find(
-      (item) => item.cpf === cpfcnpf || item.cnpj === cpfcnpf,
-    );
+    const user = this.items.find((item) => item.cpf === cpfcnpf || item.cnpj === cpfcnpf);
 
     if (!user) return null;
 

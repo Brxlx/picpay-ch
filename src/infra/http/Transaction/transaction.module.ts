@@ -17,13 +17,7 @@ import { MakeTransactionController } from './make-transaction.controller';
 import { MakeTransactionService } from './make-transaction.service';
 
 @Module({
-  imports: [
-    DatabaseModule,
-    EnvModule,
-    AuthorizerModule,
-    QueueModule,
-    NotificationModule,
-  ],
+  imports: [DatabaseModule, EnvModule, AuthorizerModule, QueueModule, NotificationModule],
   controllers: [MakeTransactionController],
   providers: [
     {
@@ -43,14 +37,7 @@ import { MakeTransactionService } from './make-transaction.service';
           queue,
         );
       },
-      inject: [
-        TransactionRepository,
-        WalletsRepository,
-        CoreEnv,
-        Authorizer,
-        Queue,
-        Notification,
-      ],
+      inject: [TransactionRepository, WalletsRepository, CoreEnv, Authorizer, Queue, Notification],
     },
   ],
   exports: [MakeTransactionService],

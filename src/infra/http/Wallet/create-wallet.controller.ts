@@ -21,11 +21,7 @@ import { WalletAccountExistsError } from '@/domain/application/use-cases/errors/
 
 import { ZodValidationPipe } from '../pipes/zod-validation.pipe';
 import { CreateWalletService } from './create-wallet.service';
-import {
-  CreateWalletDTO,
-  CreateWalletSchema,
-  createWalletSchema,
-} from './types/wallet-schemas';
+import { CreateWalletDTO, CreateWalletSchema, createWalletSchema } from './types/wallet-schemas';
 
 @Controller('/wallets')
 export class CreateWalletController {
@@ -59,10 +55,7 @@ export class CreateWalletController {
     }
   }
 
-  private handleControllerError(err: {
-    constructor: any;
-    message: string | Record<string, any>;
-  }) {
+  private handleControllerError(err: { constructor: any; message: string | Record<string, any> }) {
     switch (err.constructor) {
       case InvalidIdentifierError:
         throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
@@ -71,9 +64,7 @@ export class CreateWalletController {
       case EmailAlreadyExistsError:
         throw new HttpException(err.message, HttpStatus.BAD_GATEWAY);
       default:
-        throw new InternalServerErrorException(
-          err.message ?? 'Something went wrong on Server',
-        );
+        throw new InternalServerErrorException(err.message ?? 'Something went wrong on Server');
     }
   }
 }

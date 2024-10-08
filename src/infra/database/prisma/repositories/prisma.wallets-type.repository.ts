@@ -11,9 +11,7 @@ import { PrismaService } from '../prisma.service';
 export class PrismaWalletsTypeRepository implements WalletsTypeRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByDescription(
-    description: WALLET_TYPE,
-  ): Promise<WalletType | null> {
+  async findByDescription(description: WALLET_TYPE): Promise<WalletType | null> {
     const walletType = await this.prisma.walletType.findFirst({
       where: { description: { equals: description } },
     });

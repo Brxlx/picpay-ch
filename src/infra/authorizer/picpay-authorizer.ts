@@ -5,10 +5,7 @@ import { Transaction } from '@/domain/enterprise/entities/transaction';
 
 export class PicPayAuthorizer implements Authorizer {
   private logger: Logger = new Logger(PicPayAuthorizer.name);
-  async authorize(
-    transaction: Transaction,
-    url: string,
-  ): Promise<{ isAuthorized: boolean }> {
+  async authorize(transaction: Transaction, url: string): Promise<{ isAuthorized: boolean }> {
     try {
       const { authorized } = (await fetch(url, {
         method: 'POST',
@@ -20,9 +17,7 @@ export class PicPayAuthorizer implements Authorizer {
           payee: transaction.receiver,
           amount: transaction.amount,
         }),
-      }).then((response) =>
-        response.json().then((jsonSerialized) => jsonSerialized),
-      )) as {
+      }).then((response) => response.json().then((jsonSerialized) => jsonSerialized))) as {
         authorized: boolean;
       };
       // isAuthorized.authorized = false;

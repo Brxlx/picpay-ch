@@ -12,9 +12,7 @@ export const makeTransactionSchema = extendApi(
       .transform((val) => {
         const decimalPart = val - Math.trunc(val);
         // Se tiver uma casa decimal, adiciona um zero
-        return decimalPart.toFixed(1) === decimalPart.toString()
-          ? val.toFixed(2)
-          : val.toFixed(2);
+        return decimalPart.toFixed(1) === decimalPart.toString() ? val.toFixed(2) : val.toFixed(2);
       })
       .transform((val) => parseFloat(val)),
   }),
@@ -28,6 +26,4 @@ const makeTransactionResponse = extendApi(
 
 export type MakeTransactionSchema = z.infer<typeof makeTransactionSchema>;
 export class MakeTransactionDTO extends createZodDto(makeTransactionSchema) {}
-export class MakeTransactionResponse extends createZodDto(
-  makeTransactionResponse,
-) {}
+export class MakeTransactionResponse extends createZodDto(makeTransactionResponse) {}

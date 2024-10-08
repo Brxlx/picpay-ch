@@ -14,9 +14,7 @@ export class PrismaWalletsTypeMapper {
     );
   }
 
-  static toPrisma(
-    walletstype: WalletType,
-  ): Prisma.WalletTypeUncheckedCreateInput {
+  static toPrisma(walletstype: WalletType): Prisma.WalletTypeUncheckedCreateInput {
     return {
       id: walletstype.id.toString(),
       description: walletstype.description,

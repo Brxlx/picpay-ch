@@ -16,9 +16,7 @@ export class PrismaTransactionMapper {
     );
   }
 
-  static toPrisma(
-    transaction: Transaction,
-  ): Prisma.TransactionUncheckedCreateInput {
+  static toPrisma(transaction: Transaction): Prisma.TransactionUncheckedCreateInput {
     return {
       id: transaction.id.toString(),
       senderId: transaction.sender.toString(),

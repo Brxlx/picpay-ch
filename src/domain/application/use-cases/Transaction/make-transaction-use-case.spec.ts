@@ -81,9 +81,7 @@ suite('[Transaction]', () => {
 
       expect(isAuthorized).toBeTruthy();
       expect(sender.balance).toEqual(PAYER_INITIAL_AMOUNT - transaction.amount);
-      expect(receiver.balance).toEqual(
-        PAYEE_INITIAL_AMOUNT + transaction.amount,
-      );
+      expect(receiver.balance).toEqual(PAYEE_INITIAL_AMOUNT + transaction.amount);
     });
 
     it('should not be able to make a transaction from Merchant to User', async () => {

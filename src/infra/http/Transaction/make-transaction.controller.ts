@@ -32,9 +32,7 @@ import {
 
 @Controller('/tranfer')
 export class MakeTransactionController {
-  constructor(
-    private readonly makeTransactionService: MakeTransactionService,
-  ) {}
+  constructor(private readonly makeTransactionService: MakeTransactionService) {}
   @Post()
   @HttpCode(HttpStatus.OK)
   @ApiTags('Transaction')
@@ -61,10 +59,7 @@ export class MakeTransactionController {
     }
   }
 
-  private handleControllerError(err: {
-    constructor: any;
-    message: string | Record<string, any>;
-  }) {
+  private handleControllerError(err: { constructor: any; message: string | Record<string, any> }) {
     switch (err.constructor) {
       case SamePayerAndPayeeIdError:
         throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
@@ -77,9 +72,7 @@ export class MakeTransactionController {
       case InvalidUserTypeOnTranferError:
         throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
       default:
-        throw new InternalServerErrorException(
-          err.message ?? 'Something went wrong on Server',
-        );
+        throw new InternalServerErrorException(err.message ?? 'Something went wrong on Server');
     }
   }
 }

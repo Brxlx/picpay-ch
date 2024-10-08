@@ -1,10 +1,6 @@
 import { randomBytes } from 'node:crypto';
 
-import {
-  Injectable,
-  OnApplicationBootstrap,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, OnApplicationBootstrap, OnModuleDestroy } from '@nestjs/common';
 import { Channel, connect, Connection, ConsumeMessage } from 'amqplib';
 
 import { CoreEnv } from '@/core/env/env';
@@ -16,9 +12,7 @@ import { Wallet } from '@/domain/enterprise/entities/wallet';
 import { Env } from '../env/env-schema';
 
 @Injectable()
-export class AmqpQueue
-  implements Queue, OnApplicationBootstrap, OnModuleDestroy
-{
+export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy {
   private connection: Connection | undefined = undefined;
   private producer: Channel | undefined = undefined;
   private consumer: Channel | undefined = undefined;
@@ -78,9 +72,10 @@ export class AmqpQueue
     });
   }
 
-  private serializeStringToTransactionAndPayeeEntities(
-    message: ConsumeMessage,
-  ): { transaction: Transaction; payee: Wallet } {
+  private serializeStringToTransactionAndPayeeEntities(message: ConsumeMessage): {
+    transaction: Transaction;
+    payee: Wallet;
+  } {
     const parsedMessage = JSON.parse(message.content.toString()) as {
       transaction: Transaction;
       payee: Wallet;
@@ -90,10 +85,7 @@ export class AmqpQueue
       Transaction.create(parsedMessage.transaction),
       parsedMessage.transaction,
     );
-    const serializedPayee = Object.assign(
-      Wallet.create(parsedMessage.payee),
-      parsedMessage.payee,
-    );
+    const serializedPayee = Object.assign(Wallet.create(parsedMessage.payee), parsedMessage.payee);
 
     return {
       transaction: serializedTransaction,
@@ -109,8 +101,7 @@ export class AmqpQueue
     if (!this.consumer) return;
     try {
       // Serialize again the parsed message into a full Transaction instance witth getters and setters
-      const { transaction, payee } =
-        this.serializeStringToTransactionAndPayeeEntities(msg);
+      const { transaction, payee } = this.serializeStringToTransactionAndPayeeEntities(msg);
       // Then call notification service to notificate user
       // throw new Error('Error sending notification, sending to DLQ');
       this.generateRandomError();
@@ -125,9 +116,7 @@ export class AmqpQueue
 
   private generateRandomError() {
     const generatedRandomBytes = randomBytes(4);
-    const randomNumber = parseFloat(
-      (generatedRandomBytes.readUInt32BE() / 0xffffffff).toFixed(2),
-    );
+    const randomNumber = parseFloat((generatedRandomBytes.readUInt32BE() / 0xffffffff).toFixed(2));
     const errorProbability = 0.6; // Probabilidade de ocorrer um erro
     console.log('val do erro é ', randomNumber);
     if (randomNumber < errorProbability) {
