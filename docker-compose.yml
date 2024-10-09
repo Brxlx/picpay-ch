@@ -12,7 +12,7 @@ services:
     env_file:
       - .env
     environment:
-      - DATABASE_URL=postgresql://$DB_USER}:${DB_PASS}@host.docker.internal:5432/${DB_DB}?schema=public
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@host.docker.internal:5432/${DB_DB}?schema=public
 
   queue:
     image: rabbitmq:3.13.7-management
