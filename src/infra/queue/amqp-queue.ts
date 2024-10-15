@@ -99,11 +99,7 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
     };
   }
 
-  private async handleMessage(
-    msg: ConsumeMessage,
-    // consumer: Channel,
-    dlqName: string,
-  ) {
+  private async handleMessage(msg: ConsumeMessage, dlqName: string) {
     if (!this.consumer) return;
     try {
       // Serialize again the parsed message into a full Transaction instance witth getters and setters
