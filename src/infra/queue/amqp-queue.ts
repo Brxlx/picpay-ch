@@ -11,6 +11,12 @@ import { Wallet } from '@/domain/enterprise/entities/wallet';
 
 import { Env } from '../env/env-schema';
 
+/**
+ * Implements the `Queue` interface and provides functionality for managing an AMQP (RabbitMQ) queue.
+ * This class is responsible for establishing a connection to the RabbitMQ server, creating producer and consumer channels,
+ * and handling message production and consumption.
+ * It also implements the `OnApplicationBootstrap` and `OnModuleDestroy` interfaces to handle initialization and cleanup tasks.
+ */
 @Injectable()
 export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy {
   private connection: Connection | undefined = undefined;
