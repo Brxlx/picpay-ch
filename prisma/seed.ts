@@ -1,17 +1,16 @@
 import { PrismaClient } from '@prisma/client';
 
-import { BcryptHasher } from '../src/infra/crypto/bcrypt-hasher';
-import { Identifiers } from '../src/infra/helpers/Identifiers';
+// import { BcryptHasher } from '../src/infra/crypto/bcrypt-hasher';
+// import { Identifiers } from '../src/infra/helpers/Identifiers';
+import { BcryptHasher } from '@/infra/crypto/bcrypt-hasher';
+import { Identifiers } from '@/infra/helpers/Identifiers';
 
 const prisma = new PrismaClient();
 
 async function createWalletType() {
   const findIfAlreadyCreatedWalletTypes = await prisma.walletType.findMany({
     where: {
-      OR: [
-        { description: { equals: 'USER' } },
-        { description: { equals: 'MERCHANT' } },
-      ],
+      OR: [{ description: { equals: 'USER' } }, { description: { equals: 'MERCHANT' } }],
     },
   });
   if (findIfAlreadyCreatedWalletTypes.length) {

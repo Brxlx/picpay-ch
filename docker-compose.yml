@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: pass-in-api
+    container_name: picpay-api
     restart: unless-stopped
     # depends_on:
     #   - db
@@ -13,6 +13,7 @@ services:
       - .env
     environment:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@host.docker.internal:5432/${DB_DB}?schema=public
+      - RABBITMQ_URL=amqp://guest:guest@host.docker.internal:5672
 
   queue:
     image: rabbitmq:3.13.7-management
