@@ -48,7 +48,6 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
 
   async produce(topic: string, message: Buffer): Promise<void> {
     if (!this.producer) return;
-    // this.producer = await this.connection.createChannel();
 
     await this.producer.assertQueue(topic);
 
