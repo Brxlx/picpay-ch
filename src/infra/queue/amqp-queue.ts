@@ -22,6 +22,7 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
   private connection: Connection | undefined = undefined;
   private producer: Channel | undefined = undefined;
   private consumer: Channel | undefined = undefined;
+  private readonly PREFETCH_COUNT = 10; // Processamento paralelo de mensagens
 
   constructor(
     private readonly envService: CoreEnv<Env>,
@@ -39,40 +40,81 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
   }
 
   private async initialize() {
-    this.connection = await connect(this.envService.get('RABBITMQ_URL'));
-    this.connection.setMaxListeners(15);
-    this.producer = await this.connection.createChannel();
-    this.consumer = await this.connection.createChannel();
-    await this.consume('create-transaction');
+    try {
+      this.connection = await connect(this.envService.get('RABBITMQ_URL'));
+      this.connection.setMaxListeners(15);
+
+      // Paralel inicialization of producer and consumer channels
+      [this.producer, this.consumer] = await Promise.all([
+        this.connection.createChannel(),
+        this.connection.createChannel(),
+      ]);
+
+      // Configuração de prefetch para processamento paralelo
+      await this.consumer.prefetch(this.PREFETCH_COUNT);
+
+      // await this.consume('create-transaction');
+      await this.setupQueues('create-transaction');
+    } catch (error) {
+      console.error('Error initializing AMQP:', error);
+      throw new Error('Failed to initialize AMQP');
+    }
+  }
+
+  private async setupQueues(topic: string): Promise<void> {
+    if (!this.consumer) return;
+
+    const dlqName = topic.concat('.dlx');
+
+    // Paralel initialization of DLX and DLQ
+    await Promise.all([
+      this.consumer.assertExchange('dlx', 'fanout', { durable: true }),
+      this.consumer.assertQueue(dlqName, {
+        durable: true,
+        deadLetterExchange: 'dlx',
+      }),
+      this.consumer.assertQueue(topic, {
+        durable: true,
+      }),
+    ]);
+
+    await this.consume(topic);
   }
 
   async produce(topic: string, message: Buffer): Promise<void> {
     if (!this.producer) return;
 
-    await this.producer.assertQueue(topic);
+    try {
+      await this.producer.assertQueue(topic);
 
-    this.producer.sendToQueue(topic, message);
+      const sentMessage = this.producer.sendToQueue(topic, message, {
+        persistent: true,
+        headers: {
+          messageId: randomBytes(16).toString('hex'),
+        },
+      });
+
+      if (!sentMessage) console.warn('Message not sent');
+    } catch (error) {
+      console.error('Failed to produce message:', error);
+      throw new Error('Failed to produce message');
+    }
   }
 
   async consume(topic: string): Promise<void> {
     if (!this.consumer) return;
-    const dlqName = topic.concat('.dlx');
-    // this.consumer = await this.connection.createChannel();
 
-    //Queue setup
-    await this.consumer.assertExchange('dlx', 'fanout', { durable: true });
-    await this.consumer.assertQueue(dlqName, {
-      durable: true,
-      deadLetterExchange: 'dlx',
-    });
-    await this.consumer.assertQueue(topic, {
-      durable: true,
-    });
+    const dlqName = topic.concat('.dlx');
 
     await this.consumer.consume(topic, async (msg) => {
-      if (msg) {
-        if (!this.consumer) return;
+      if (!msg) return;
+
+      try {
         await this.handleMessage(msg, dlqName);
+      } catch (error) {
+        console.error('Failed to process message:', error);
+        // Rejeita a mensagem sem requeue
+        this.consumer?.nack(msg, false, false);
       }
     });
   }
@@ -103,26 +145,55 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
     try {
       // Serialize again the parsed message into a full Transaction instance witth getters and setters
       const { transaction, payee } = this.serializeStringToTransactionAndPayeeEntities(msg);
-      // Then call notification service to notificate user
-      // throw new Error('Error sending notification, sending to DLQ');
-      this.generateRandomError();
-      this.consumer?.ack(msg);
-      await this.notification.notificate(transaction, payee);
-    } catch (err: any) {
-      console.log('Error consuming messages, logging...', err.message);
-      this.consumer.nack(msg, false, false);
-      this.consumer.sendToQueue(dlqName, Buffer.from(JSON.stringify(msg)));
+
+      // Define um timeout global para toda a operação
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Operation timed out')), 30000);
+      });
+
+      // Cria o processo principal que inclui todas as etapas necessárias
+      const processingPromise = async () => {
+        // 1. Gera erro aleatório (pode lançar exceção)
+        // TODO: create associeted error
+        if (!this.generateRandomError()) throw new Error('Error sendind notification');
+
+        // 2. Aplica o delay de processamento
+        // await QueueDelayHelper.delay(
+        //   QueueDelayHelper.getRandomDelay(2000, 5000),
+        //   `Processando transação ${transaction.id.toString()}`,
+        // );
+
+        // 3. Se chegou até aqui, não houve erros no processamento
+        // Então podemos enviar a notificação com segurança
+        await this.notification.notificate(transaction, payee);
+
+        // 4. Confirma o processamento da mensagem
+        this.consumer?.ack(msg);
+      };
+
+      // Executa o processamento com timeout
+      await Promise.race([processingPromise(), timeoutPromise]);
+    } catch (error: any) {
+      console.error('Processing error:', error);
+      if (this.consumer) {
+        this.consumer.nack(msg, false, false);
+        this.consumer.sendToQueue(dlqName, msg.content, {
+          headers: { ...msg.properties.headers, error: error.message },
+        });
+      }
     }
   }
 
   private generateRandomError() {
     const generatedRandomBytes = randomBytes(4);
     const randomNumber = parseFloat((generatedRandomBytes.readUInt32BE() / 0xffffffff).toFixed(2));
-    const errorProbability = 0.6; // Probabilidade de ocorrer um erro
+    const errorProbability = 0.95; // Probabilidade de ocorrer um erro
     console.log('val do erro é ', randomNumber);
     if (randomNumber < errorProbability) {
       // Simular um erro
-      throw new Error('Error sending notification, sending to DLQ');
+      console.error('Error sending notification, sending to DLQ');
+      return false;
     }
+    return true;
   }
 }

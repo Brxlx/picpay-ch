@@ -80,7 +80,6 @@ export class MakeTransactionUseCase {
     });
 
     // First authorize transaction
-    console.log('authorizer: ', this.envService.get('TRANSFER_AUTHORIZER_URL_MOCK'));
     const { isAuthorized } = await this.authorizeTransaction(
       transaction,
       this.envService.get('TRANSFER_AUTHORIZER_URL_MOCK'),
