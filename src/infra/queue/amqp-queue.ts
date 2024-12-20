@@ -10,6 +10,9 @@ import { Transaction } from '@/domain/enterprise/entities/transaction';
 import { Wallet } from '@/domain/enterprise/entities/wallet';
 
 import { Env } from '../env/env-schema';
+import { InitializingQueueError } from './errors/initializing-queue-error';
+import { ProduceMessageError } from './errors/produce-message-error';
+import { SendNotificationError } from './errors/send-notification-error';
 
 /**
  * Implements the `Queue` interface and provides functionality for managing an AMQP (RabbitMQ) queue.
@@ -55,9 +58,9 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
 
       // await this.consume('create-transaction');
       await this.setupQueues('create-transaction');
-    } catch (error) {
-      console.error('Error initializing AMQP:', error);
-      throw new Error('Failed to initialize AMQP');
+    } catch (error: any) {
+      console.error('Error initializing AMQP:', error.message);
+      throw new InitializingQueueError();
     }
   }
 
@@ -84,20 +87,19 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
   async produce(topic: string, message: Buffer): Promise<void> {
     if (!this.producer) return;
 
+    await this.producer.assertQueue(topic);
+
     try {
-      await this.producer.assertQueue(topic);
+      const messageId = randomBytes(16).toString('hex');
 
       const sentMessage = this.producer.sendToQueue(topic, message, {
         persistent: true,
-        headers: {
-          messageId: randomBytes(16).toString('hex'),
-        },
+        correlationId: messageId,
       });
 
-      if (!sentMessage) console.warn('Message not sent');
-    } catch (error) {
-      console.error('Failed to produce message:', error);
-      throw new Error('Failed to produce message');
+      if (!sentMessage) throw new ProduceMessageError(`Error producing message ${messageId}`);
+    } catch (error: any) {
+      console.error('Failed to produce message with id:', error.message);
     }
   }
 
@@ -140,7 +142,7 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
     };
   }
 
-  private async handleMessage(msg: ConsumeMessage, dlqName: string) {
+  private async handleMessage(msg: ConsumeMessage, dlqName: string): Promise<void> {
     if (!this.consumer) return;
     try {
       // Serialize again the parsed message into a full Transaction instance witth getters and setters
@@ -153,17 +155,16 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
 
       // Cria o processo principal que inclui todas as etapas necessárias
       const processingPromise = async () => {
-        // 1. Gera erro aleatório (pode lançar exceção)
-        // TODO: create associeted error
-        if (!this.generateRandomError()) throw new Error('Error sendind notification');
+        // Gera erro aleatório (pode lançar exceção)
+        if (!this.generateRandomError()) throw new SendNotificationError();
 
-        // 2. Aplica o delay de processamento
+        // Aplica o delay de processamento
         // await QueueDelayHelper.delay(
         //   QueueDelayHelper.getRandomDelay(2000, 5000),
         //   `Processando transação ${transaction.id.toString()}`,
         // );
 
-        // 3. Se chegou até aqui, não houve erros no processamento
+        // Se chegou até aqui, não houve erros no processamento
         // Então podemos enviar a notificação com segurança
         await this.notification.notificate(transaction, payee);
 
@@ -174,20 +175,26 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
       // Executa o processamento com timeout
       await Promise.race([processingPromise(), timeoutPromise]);
     } catch (error: any) {
-      console.error('Processing error:', error);
       if (this.consumer) {
         this.consumer.nack(msg, false, false);
+        // Sets the correlationId and headers from the original message for tracking and debugging on dlq
         this.consumer.sendToQueue(dlqName, msg.content, {
+          correlationId: msg.properties.correlationId,
           headers: { ...msg.properties.headers, error: error.message },
         });
       }
     }
   }
 
-  private generateRandomError() {
+  /**
+   * Generates a random error with a probability of 0.65 (65%).
+   * This is used to simulate errors in the message processing logic.
+   * @returns `true` if no error is generated, `false` if an error is generated.
+   */
+  private generateRandomError(): boolean {
     const generatedRandomBytes = randomBytes(4);
     const randomNumber = parseFloat((generatedRandomBytes.readUInt32BE() / 0xffffffff).toFixed(2));
-    const errorProbability = 0.95; // Probabilidade de ocorrer um erro
+    const errorProbability = 0.65; // Probabilidade de ocorrer um erro
     console.log('val do erro é ', randomNumber);
     if (randomNumber < errorProbability) {
       // Simular um erro

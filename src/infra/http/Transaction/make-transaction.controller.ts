@@ -20,6 +20,7 @@ import { InvalidUserTypeOnTranferError } from '@/domain/application/use-cases/er
 import { SamePayerAndPayeeIdError } from '@/domain/application/use-cases/errors/same-payer-and-payee-id-error';
 import { TransactionNotAuthorizedError } from '@/domain/application/use-cases/errors/transaction-not-authorized-error';
 import { UserOnTransactionNotFoundError } from '@/domain/application/use-cases/errors/user-on-transacton-not-found-error';
+import { ProduceMessageError } from '@/infra/queue/errors/produce-message-error';
 
 import { ZodValidationPipe } from '../pipes/zod-validation.pipe';
 import { MakeTransactionService } from './make-transaction.service';
@@ -71,6 +72,8 @@ export class MakeTransactionController {
         throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
       case InvalidUserTypeOnTranferError:
         throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+      case ProduceMessageError:
+        throw new HttpException(err.message, HttpStatus.PRECONDITION_FAILED);
       default:
         throw new InternalServerErrorException(err.message ?? 'Something went wrong on Server');
     }

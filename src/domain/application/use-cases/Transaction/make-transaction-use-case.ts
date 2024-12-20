@@ -94,8 +94,7 @@ export class MakeTransactionUseCase {
         'create-transaction',
         Buffer.from(JSON.stringify({ transaction, payee })),
       );
-      // Send notification
-      // await this.notification.notificate(transaction, payee);
+
       console.table([
         { 'payer balance': payer.balance },
         { 'payee balance': payee.balance },
