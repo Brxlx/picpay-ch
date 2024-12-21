@@ -31,7 +31,7 @@ import {
   makeTransactionSchema,
 } from './types/transaction-schemas';
 
-@Controller('/tranfer')
+@Controller('/transfer')
 export class MakeTransactionController {
   constructor(private readonly makeTransactionService: MakeTransactionService) {}
   @Post()

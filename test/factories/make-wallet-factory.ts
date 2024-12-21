@@ -1,7 +1,10 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
+import { Injectable } from '@nestjs/common';
 
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { Wallet, WalletProps } from '@/domain/enterprise/entities/wallet';
+import { PrismaWalletMapper } from '@/infra/database/prisma/mappers/prisma-wallet.mapper';
+import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Identifiers } from '@/infra/helpers/Identifiers';
 
 export async function makeWallet(
@@ -21,4 +24,32 @@ export async function makeWallet(
     },
     id,
   );
+}
+
+@Injectable()
+export class WalletFactory {
+  constructor(private readonly prisma: PrismaService) {}
+
+  private async ensureWalletTypes() {
+    await this.prisma.walletType.createMany({
+      data: [
+        { id: 'USER', description: 'USER' },
+        { id: 'MERCHANT', description: 'MERCHANT' },
+      ],
+      skipDuplicates: true,
+    });
+  }
+
+  public async makePrismaWallet(data: Partial<WalletProps> = {}, id?: UniqueEntityID) {
+    // ensure wallet types is created and have no duplicates
+    await this.ensureWalletTypes();
+
+    const wallet = await makeWallet(data, id);
+
+    await this.prisma.wallet.create({
+      data: PrismaWalletMapper.toPrisma(wallet),
+    });
+
+    return wallet;
+  }
 }
