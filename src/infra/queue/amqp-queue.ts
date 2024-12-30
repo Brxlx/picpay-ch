@@ -2,6 +2,17 @@ import { randomBytes } from 'node:crypto';
 
 import { Injectable, OnApplicationBootstrap, OnModuleDestroy } from '@nestjs/common';
 import { Channel, connect, Connection, ConsumeMessage } from 'amqplib';
+import {
+  catchError,
+  from,
+  mergeMap,
+  Observable,
+  race,
+  Subject,
+  tap,
+  throwError,
+  timer,
+} from 'rxjs';
 
 import { CoreEnv } from '@/core/env/env';
 import { Notification } from '@/domain/application/gateways/notification/notification';
@@ -25,15 +36,21 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
   private connection: Connection | undefined = undefined;
   private producer: Channel | undefined = undefined;
   private consumer: Channel | undefined = undefined;
-  private readonly PREFETCH_COUNT = 10; // Processamento paralelo de mensagens
+  private $messageProcessor: Subject<ConsumeMessage>;
+  private isInitialized = false;
+  private readonly PREFETCH_COUNT = 3; // Processamento paralelo de mensagens
+  private readonly MESSAGE_SEND_TIMEOUT = 30000; // 30 seconds
 
   constructor(
     private readonly envService: CoreEnv<Env>,
     private readonly notification: Notification,
-  ) {}
+  ) {
+    this.$messageProcessor = new Subject<ConsumeMessage>();
+  }
 
   async onApplicationBootstrap() {
     await this.initialize();
+    this.setupMessageProcessor();
   }
 
   async onModuleDestroy() {
@@ -57,18 +74,22 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
       await this.consumer.prefetch(this.PREFETCH_COUNT);
 
       await this.setupQueues('transaction');
+      this.isInitialized = true;
     } catch (error: any) {
       console.error('Error initializing AMQP:', error.message);
+      this.isInitialized = false;
       throw new InitializingQueueError();
     }
   }
 
   private async setupQueues(topic: string): Promise<void> {
+    if (!this.producer) return;
     if (!this.consumer) return;
 
     const dlqName = topic.concat('.dlx');
     const exchangeName = 'transaction';
     const routingKey = 'transaction.create'; // routing key for direct exchange
+    const waitingQueueName = topic.concat('.waiting');
 
     // Paralel initialization of Queue and DLQ
     await Promise.all([
@@ -77,6 +98,15 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
         durable: true,
         deadLetterExchange: exchangeName,
         deadLetterRoutingKey: `${routingKey}.dlx`,
+      }),
+      this.consumer.assertQueue(waitingQueueName, {
+        durable: true,
+        deadLetterExchange: exchangeName,
+        deadLetterRoutingKey: routingKey,
+        arguments: {
+          'x-dead-letter-exchange': exchangeName,
+          'x-dead-letter-routing-key': routingKey,
+        },
       }),
       this.consumer.assertQueue(dlqName, {
         durable: true,
@@ -87,9 +117,30 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
     await Promise.all([
       this.consumer.bindQueue(topic, exchangeName, routingKey),
       this.consumer.bindQueue(dlqName, exchangeName, routingKey.concat('.dlx')),
+      this.consumer.bindQueue(waitingQueueName, exchangeName, routingKey.concat('.waiting')),
     ]);
 
     await this.consume(topic);
+  }
+  private setupMessageProcessor() {
+    if (!this.isInitialized) {
+      console.error('❌ Tentativa de configurar processador antes da inicialização');
+      return;
+    }
+
+    this.$messageProcessor
+      .pipe(
+        mergeMap((message) => {
+          return this.handleMessage(message);
+        }, this.PREFETCH_COUNT),
+      )
+      .subscribe({
+        error: (error) => {
+          console.error('❌ Error processing message:', error);
+          // Re-initialize the message processor
+          this.setupMessageProcessor();
+        },
+      });
   }
 
   /**
@@ -100,12 +151,10 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
    * @returns A Promise that resolves when the message has been published.
    * @throws {ProduceMessageError} If there is an error publishing the message.
    */
-  async produce(topic: string, message: Buffer): Promise<void> {
+  async produce(topic: string, message: Buffer, delayMs?: number): Promise<void> {
     if (!this.producer) return;
     const exchangeName = topic; // Can vary so best be dynamic
-    const routingKey = `${exchangeName}.create`;
-
-    console.log(exchangeName, routingKey);
+    const routingKey = delayMs ? `${exchangeName}.create.waiting` : `${exchangeName}.create`;
 
     // await this.producer.assertExchange(exchangeName, 'direct', {durable: true});
 
@@ -115,9 +164,16 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
       const sentMessage = this.producer.publish(exchangeName, routingKey, message, {
         persistent: true,
         correlationId: messageId,
+        expiration: delayMs?.toString(),
+        headers: {
+          'x-delay': delayMs,
+        },
       });
 
       if (!sentMessage) throw new ProduceMessageError(`Error producing message ${messageId}`);
+      console.log(
+        `[${messageId}] 📤 Mensagem publicada ${delayMs ? `com delay de ${delayMs}ms` : 'sem delay'}`,
+      );
     } catch (error: any) {
       console.error('Failed to produce message with id:', error.message);
     }
@@ -140,7 +196,8 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
       if (!msg) return;
 
       try {
-        await this.handleMessage(msg);
+        // await this.handleMessage(msg);
+        this.$messageProcessor.next(msg);
       } catch (error) {
         console.error('Failed to process message:', error);
         // Rejeita a mensagem sem requeue
@@ -170,41 +227,58 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
     };
   }
 
-  private async handleMessage(msg: ConsumeMessage): Promise<void> {
-    if (!this.consumer) return;
-    try {
-      // Serialize again the parsed message into a full Transaction instance witth getters and setters
-      const { transaction, payee } = this.serializeStringToTransactionAndPayeeEntities(msg);
-
-      // Define um timeout global para toda a operação
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Operation timed out')), 30000);
-      });
-
-      // Cria o processo principal que inclui todas as etapas necessárias
-      const processingPromise = async () => {
-        // Gera erro aleatório (pode lançar exceção)
-        if (!this.generateRandomError()) throw new SendNotificationError();
-
-        // Aplica o delay de processamento
-        // await QueueDelayHelper.delay(
-        //   QueueDelayHelper.getRandomDelay(2000, 5000),
-        //   `Processando transação ${transaction.id.toString()}`,
-        // );
-
-        // Se chegou até aqui, não houve erros no processamento
-        // Então podemos enviar a notificação com segurança
-        await this.notification.notificate(transaction, payee);
-
-        // 4. Confirma o processamento da mensagem
-        this.consumer?.ack(msg);
-      };
-
-      // Executa o processamento com timeout
-      await Promise.race([processingPromise(), timeoutPromise]);
-    } catch {
-      this.consumer.nack(msg, false, false);
+  private handleMessage(msg: ConsumeMessage): Observable<void> {
+    // Verifica o estado da fila antes de processar
+    if (!this.isInitialized || !this.consumer) {
+      console.error(
+        `[${msg.properties.correlationId}] ❌ Tentativa de processar mensagem com fila não inicializada`,
+      );
+      return from(Promise.resolve()).pipe(
+        mergeMap(() => {
+          this.consumer?.nack(msg, false, false);
+          return throwError(() => new SendNotificationError());
+        }),
+      );
     }
+
+    return race(
+      from(Promise.resolve()).pipe(
+        mergeMap(() => {
+          const { transaction, payee } = this.serializeStringToTransactionAndPayeeEntities(msg);
+
+          // Simula o erro aleatório
+          if (!this.generateRandomError()) {
+            this.consumer?.nack(msg, false, false);
+            return from(Promise.resolve()); // Completamos o observable sem erro
+          }
+
+          // Processa a notificação
+          return from(this.notification.notificate(transaction, payee)).pipe(
+            tap(() => {
+              this.consumer?.ack(msg);
+            }),
+            catchError((error) => {
+              console.error(`[${msg.properties.correlationId}] Erro ao enviar notificação:`, error);
+              this.consumer?.nack(msg, false, false);
+              return from(Promise.resolve()); // Completamos o observable sem erro
+            }),
+          );
+        }),
+      ),
+      timer(this.MESSAGE_SEND_TIMEOUT).pipe(
+        mergeMap(() => {
+          console.error(`[${msg.properties.correlationId}] ⏰ Timeout no processamento`);
+          this.consumer?.nack(msg, false, false);
+          return from(Promise.resolve()); // Completamos o observable sem erro
+        }),
+      ),
+    ).pipe(
+      catchError((error) => {
+        console.error(`[${msg.properties.correlationId}] 🔥 Unexpected error:`, error);
+        this.consumer?.nack(msg, false, false);
+        return from(Promise.resolve());
+      }),
+    );
   }
 
   /**

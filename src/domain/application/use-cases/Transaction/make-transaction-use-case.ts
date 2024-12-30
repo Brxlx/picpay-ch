@@ -90,7 +90,11 @@ export class MakeTransactionUseCase {
 
       // Put message on queue
       // Notification is sent when the message is read
-      await this.queue.produce('transaction', Buffer.from(JSON.stringify({ transaction, payee })));
+      await this.queue.produce(
+        'transaction',
+        Buffer.from(JSON.stringify({ transaction, payee })),
+        10000,
+      );
 
       console.table([
         { 'payer balance': payer.balance },
