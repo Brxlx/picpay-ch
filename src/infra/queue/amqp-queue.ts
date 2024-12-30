@@ -248,7 +248,7 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
           const { transaction, payee } = this.serializeStringToTransactionAndPayeeEntities(msg);
 
           // Simula o erro aleatório
-          if (!this.generateRandomError()) {
+          if (!this.generateRandomError(0.65)) {
             this.consumer?.nack(msg, false, false);
             return from(Promise.resolve()); // Completamos o observable sem erro
           }
@@ -285,14 +285,14 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
   /**
    * Generates a random error with a probability of 0.65 (65%).
    * This is used to simulate errors in the message processing logic.
+   * @param probability - The probability of generating an error, between 0 and 1.
    * @returns `true` if no error is generated, `false` if an error is generated.
    */
-  private generateRandomError(): boolean {
+  private generateRandomError(probability: number): boolean {
     const generatedRandomBytes = randomBytes(4);
     const randomNumber = parseFloat((generatedRandomBytes.readUInt32BE() / 0xffffffff).toFixed(2));
-    const errorProbability = 0.65; // Probabilidade de ocorrer um erro
     console.log('val do erro é ', randomNumber);
-    if (randomNumber < errorProbability) {
+    if (randomNumber < probability) {
       // Simular um erro
       console.error('Error sending notification, sending to DLQ');
       return false;
