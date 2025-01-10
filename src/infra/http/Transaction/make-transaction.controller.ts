@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpException,
-  HttpStatus,
-  InternalServerErrorException,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -14,13 +6,6 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-
-import { InsuficientBalanceError } from '@/domain/application/use-cases/errors/insuficient-balance-error';
-import { InvalidUserTypeOnTranferError } from '@/domain/application/use-cases/errors/invalid-user-type-on-transfer-error';
-import { SamePayerAndPayeeIdError } from '@/domain/application/use-cases/errors/same-payer-and-payee-id-error';
-import { TransactionNotAuthorizedError } from '@/domain/application/use-cases/errors/transaction-not-authorized-error';
-import { UserOnTransactionNotFoundError } from '@/domain/application/use-cases/errors/user-on-transacton-not-found-error';
-import { ProduceMessageError } from '@/infra/queue/errors/produce-message-error';
 
 import { ZodValidationPipe } from '../pipes/zod-validation.pipe';
 import { MakeTransactionService } from './make-transaction.service';
@@ -48,34 +33,12 @@ export class MakeTransactionController {
     body: MakeTransactionSchema,
   ) {
     const { payer, payee, amount } = body;
-    try {
-      const { isAuthorized } = await this.makeTransactionService.execute({
-        payer,
-        payee,
-        amount,
-      });
-      return { isAuthorized };
-    } catch (err: any) {
-      this.handleControllerError(err);
-    }
-  }
 
-  private handleControllerError(err: { constructor: any; message: string | Record<string, any> }) {
-    switch (err.constructor) {
-      case SamePayerAndPayeeIdError:
-        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-      case InsuficientBalanceError:
-        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-      case TransactionNotAuthorizedError:
-        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-      case UserOnTransactionNotFoundError:
-        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-      case InvalidUserTypeOnTranferError:
-        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-      case ProduceMessageError:
-        throw new HttpException(err.message, HttpStatus.PRECONDITION_FAILED);
-      default:
-        throw new InternalServerErrorException(err.message ?? 'Something went wrong on Server');
-    }
+    const { isAuthorized } = await this.makeTransactionService.execute({
+      payer,
+      payee,
+      amount,
+    });
+    return { isAuthorized };
   }
 }

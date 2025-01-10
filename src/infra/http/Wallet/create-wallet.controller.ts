@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpException,
-  HttpStatus,
-  InternalServerErrorException,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -14,10 +6,6 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-
-import { EmailAlreadyExistsError } from '@/domain/application/use-cases/errors/email-already-exists-error';
-import { InvalidIdentifierError } from '@/domain/application/use-cases/errors/invalid-identifier-error';
-import { WalletAccountExistsError } from '@/domain/application/use-cases/errors/wallet-account-exists-error';
 
 import { ZodValidationPipe } from '../pipes/zod-validation.pipe';
 import { CreateWalletService } from './create-wallet.service';
@@ -41,30 +29,13 @@ export class CreateWalletController {
   ) {
     const { fullName, email, password, cpf, cnpj, balance } = body;
 
-    try {
-      await this.createWalletService.execute({
-        fullName,
-        email,
-        password,
-        cpf,
-        cnpj,
-        balance,
-      });
-    } catch (err: any) {
-      this.handleControllerError(err);
-    }
-  }
-
-  private handleControllerError(err: { constructor: any; message: string | Record<string, any> }) {
-    switch (err.constructor) {
-      case InvalidIdentifierError:
-        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-      case WalletAccountExistsError:
-        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-      case EmailAlreadyExistsError:
-        throw new HttpException(err.message, HttpStatus.BAD_GATEWAY);
-      default:
-        throw new InternalServerErrorException(err.message ?? 'Something went wrong on Server');
-    }
+    await this.createWalletService.execute({
+      fullName,
+      email,
+      password,
+      cpf,
+      cnpj,
+      balance,
+    });
   }
 }

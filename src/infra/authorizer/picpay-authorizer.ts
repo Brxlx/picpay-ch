@@ -27,7 +27,7 @@ export class PicPayAuthorizer implements Authorizer {
       }
       return { isAuthorized: authorized };
     } catch {
-      this.logger.error('Error authorizing transaction');
+      this.logger.error(`Error authorizing transaction id: ${transaction.id.toString()}`);
       return { isAuthorized: false };
     }
   }
