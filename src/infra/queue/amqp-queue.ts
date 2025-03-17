@@ -89,7 +89,7 @@ export class AmqpQueue implements Queue, OnApplicationBootstrap, OnModuleDestroy
     if (!this.consumer) return;
 
     const dlqName = topic.concat('.dlx');
-    const exchangeName = 'transaction';
+    const exchangeName = topic; // Can vary so best be dynamic
     const routingKey = 'transaction.create'; // routing key for direct exchange
     const waitingQueueName = topic.concat('.waiting');
 
