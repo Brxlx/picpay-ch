@@ -1,4 +1,5 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import { Response } from 'express';
 
 import { EmailAlreadyExistsError } from '@/domain/application/use-cases/errors/email-already-exists-error';
 import { InsuficientBalanceError } from '@/domain/application/use-cases/errors/insuficient-balance-error';
@@ -10,10 +11,24 @@ import { UserOnTransactionNotFoundError } from '@/domain/application/use-cases/e
 import { WalletAccountExistsError } from '@/domain/application/use-cases/errors/wallet-account-exists-error';
 import { ProduceMessageError } from '@/infra/queue/errors/produce-message-error';
 
+// Interface para representar a estrutura da resposta de erro HTTP
+interface HttpErrorResponse {
+  statusCode: number;
+  message: string | string[];
+  errors?: Record<string, string[]>;
+  timestamp: string;
+}
+
+// Interface para representar a estrutura da resposta do NestJS para exceções HTTP
+interface NestHttpExceptionResponse {
+  message: string | string[];
+  errors?: Record<string, string[]>;
+}
+
 @Catch(Error)
 export class UseCaseErrorFilter implements ExceptionFilter {
   // Map errors names to status codes
-  private errorToStatusCode = new Map([
+  private errorToStatusCode = new Map<string, HttpStatus>([
     [SamePayerAndPayeeIdError.name, HttpStatus.BAD_REQUEST],
     [InsuficientBalanceError.name, HttpStatus.BAD_REQUEST],
     [TransactionNotAuthorizedError.name, HttpStatus.BAD_REQUEST],
@@ -27,17 +42,19 @@ export class UseCaseErrorFilter implements ExceptionFilter {
 
   catch(error: Error, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse();
+    const response = ctx.getResponse<Response>();
 
     if (error instanceof HttpException) {
-      const errorResponse = error.getResponse() as any;
+      const errorResponse = error.getResponse() as NestHttpExceptionResponse;
 
-      response.status(error.getStatus()).json({
+      const httpErrorResponse: HttpErrorResponse = {
         statusCode: error.getStatus(),
         message: errorResponse.message || error.message || 'Something went wrong on Server',
         errors: errorResponse.errors,
         timestamp: new Date().toISOString(),
-      });
+      };
+
+      response.status(error.getStatus()).json(httpErrorResponse);
       return;
     }
 
