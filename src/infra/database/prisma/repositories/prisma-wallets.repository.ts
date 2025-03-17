@@ -11,10 +11,10 @@ export class PrismaWalletsRepository implements WalletsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<Wallet | null> {
-    const wallet = await this.prisma.wallet.findUnique({ where: { id } });
+    const wallet = await this.prisma.wallet.findUnique({ where: { id }, omit: { password: true } });
     if (!wallet) return null;
 
-    return PrismaWalletMapper.toDomain(wallet);
+    return PrismaWalletMapper.toDomain({ ...wallet, password: '' });
   }
   async findByEmail(email: string): Promise<Wallet | null> {
     const wallet = await this.prisma.wallet.findUnique({ where: { email } });
